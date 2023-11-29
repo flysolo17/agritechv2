@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:agritechv2/blocs/auth/auth_bloc.dart';
-import 'package:agritechv2/views/reusables/button.dart';
+import 'package:agritechv2/views/custom%20widgets/button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -71,9 +71,9 @@ class _VerificationPageState extends State<VerificationPage> {
                 const SizedBox(height: 40),
                 BlocConsumer<AuthBloc, AuthState>(
                   listener: (context, state) {
-                    if (state is AuthSuccessState) {
+                    if (state is AuthSuccessState<User>) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('Email sent to ${state.user.email}')));
+                          content: Text('Email sent to ${state.data.email}')));
                     }
                     if (state is UnAthenticatedState) {
                       context.go('/login');
@@ -86,7 +86,8 @@ class _VerificationPageState extends State<VerificationPage> {
                     }
                   },
                   builder: (context, state) {
-                    if (state is AuthSuccessState && state.user.emailVerified) {
+                    if (state is AuthSuccessState<User> &&
+                        state.data.emailVerified) {
                       context.go('/');
                     }
                     return state is AuthLoadingState

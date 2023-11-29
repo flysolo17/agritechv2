@@ -1,6 +1,8 @@
-import 'package:agritechv2/models/Products.dart';
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+
+import '../models/product/Products.dart';
 
 class ProductRepository {
   final FirebaseFirestore _firebaseFirestore;
@@ -8,26 +10,6 @@ class ProductRepository {
   ProductRepository({
     FirebaseFirestore? firebaseFirestore,
   }) : _firebaseFirestore = firebaseFirestore ?? FirebaseFirestore.instance;
-
-  Future<List<Products>> getAllProducts() async {
-    try {
-      QuerySnapshot querySnapshot =
-          await _firebaseFirestore.collection(COLLECTION_NAME).get();
-      List<Products> productsList = querySnapshot.docs
-          .map((doc) => Products.fromJson(doc.data() as Map<String, dynamic>))
-          .toList();
-      print(productsList);
-      return productsList;
-    } on FirebaseException catch (e) {
-      if (kDebugMode) {
-        print("Error firebase data: ${e.code} : ${e.message}");
-      }
-      return [];
-    } catch (e) {
-      print("Error fetching data: ${e.toString()}");
-      throw Exception(e.toString());
-    }
-  }
 
   Future<Products> getProductById(String productId) async {
     try {
@@ -49,12 +31,61 @@ class ProductRepository {
     }
   }
 
-  // Stream<Products> getProductById(String productId) {
-  //   print('Getting user data from Cloud Firestore');
-  //   return _firebaseFirestore
-  //       .collection(COLLECTION_NAME)
-  //       .doc(productId)
-  //       .snapshots()
-  //       .map((snap) => Products.fromJson(snap as Map<String, dynamic>));
-  // }
+  Stream<Products> getProductStreamById(String productId) {
+    return _firebaseFirestore
+        .collection(COLLECTION_NAME)
+        .doc(productId)
+        .snapshots()
+        .asyncMap((documentSnapshot) async {
+      if (documentSnapshot.exists) {
+        final productData = documentSnapshot.data() as Map<String, dynamic>;
+        final product = Products.fromJson(productData);
+        return product;
+      } else {
+        throw Exception("Product not found");
+      }
+    }).handleError((error) {
+      print("Error fetching product: ${error.toString()}");
+      throw Exception(error.toString());
+    });
+  }
+
+  Stream<List<Products>> getAllProducts() {
+    final controller = StreamController<List<Products>>();
+
+    Future.delayed(const Duration(seconds: 1), () {
+      _firebaseFirestore
+          .collection(COLLECTION_NAME)
+          .orderBy('createdAt', descending: true)
+          .snapshots()
+          .listen((QuerySnapshot<Map<String, dynamic>> snapshot) {
+        final productsList =
+            snapshot.docs.map((DocumentSnapshot<Map<String, dynamic>> doc) {
+          return Products.fromJson(doc.data() ?? {});
+        }).toList();
+        controller.add(productsList);
+      });
+    });
+    return controller.stream;
+  }
+
+  Stream<List<Products>> getFeaturedProducts() {
+    final controller = StreamController<List<Products>>();
+    Future.delayed(const Duration(seconds: 1), () {
+      _firebaseFirestore
+          .collection(COLLECTION_NAME)
+          .where('featured', isEqualTo: true)
+          .orderBy('createdAt')
+          .snapshots()
+          .listen((QuerySnapshot<Map<String, dynamic>> snapshot) {
+        final productsList =
+            snapshot.docs.map((DocumentSnapshot<Map<String, dynamic>> doc) {
+          return Products.fromJson(doc.data() ?? {});
+        }).toList();
+        print("${productsList} Test");
+        controller.add(productsList);
+      });
+    });
+    return controller.stream;
+  }
 }

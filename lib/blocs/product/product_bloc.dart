@@ -1,8 +1,8 @@
-
-import 'package:agritechv2/models/Products.dart';
 import 'package:agritechv2/repository/product_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+
+import '../../models/product/Products.dart';
 
 part 'product_event.dart';
 part 'product_state.dart';
@@ -11,16 +11,17 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final ProductRepository _productRepository;
   ProductBloc({required ProductRepository productRepository})
       : _productRepository = productRepository,
-        super(const ProductLoaded([])) {
+        super(ProductInitial()) {
     on<ProductEvent>((event, emit) {});
-    on<GetProductEvent>(_getAllProducts);
+    on<GetProductByIDEvent>(_getProductByID);
   }
-  void _getAllProducts(
-      GetProductEvent event, Emitter<ProductState> emit) async {
+
+  void _getProductByID(
+      GetProductByIDEvent event, Emitter<ProductState> emit) async {
     try {
       emit(ProductLoading());
-      final data = await _productRepository.getAllProducts();
-      emit(ProductLoaded(data));
+      Products data = await _productRepository.getProductById(event.id);
+      emit(ProductLoaded<Products>(data));
     } catch (e) {
       emit(ProductError(e.toString()));
     }

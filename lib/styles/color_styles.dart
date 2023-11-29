@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ColorStyle {
-
+  static const checkoutBackground = Color(0xFFEBEBF0);
   static const grey = Color(0xff3D3B39);
   static const brandRed = Color(0xff901A21);
   static const brandGreen = Colors.green;
@@ -13,5 +13,5 @@ class ColorStyle {
   static const background = Colors.white;
   static const whiteColor = Colors.white;
   static const blackColor = Colors.black;
-    static const orangeColor = Color(0xffF36E0C);
+  static const orangeColor = Color(0xffF36E0C);
 }

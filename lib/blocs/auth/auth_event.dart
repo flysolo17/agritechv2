@@ -56,3 +56,26 @@ class AuthGetProfileEvent extends AuthEvent {
   @override
   List<Object?> get props => [];
 }
+
+class ForgotPassword extends AuthEvent {
+  final String email;
+  const ForgotPassword(this.email);
+  @override
+  List<Object> get props => [email];
+}
+
+class ReauthenticateUser extends AuthEvent {
+  final String currentPassword;
+  final String newPassword;
+  const ReauthenticateUser(this.currentPassword, this.newPassword);
+  @override
+  List<Object> get props => [currentPassword, newPassword];
+}
+
+class ChangeUserPassword extends AuthEvent {
+  final User user;
+  final String newPassword;
+  const ChangeUserPassword(this.user, this.newPassword);
+  @override
+  List<Object> get props => [user, newPassword];
+}

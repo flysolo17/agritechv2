@@ -1,5 +1,5 @@
-import 'package:agritechv2/views/reusables/button.dart';
-import 'package:agritechv2/views/reusables/input_field.dart';
+import 'package:agritechv2/views/custom%20widgets/button.dart';
+import 'package:agritechv2/views/custom%20widgets/input_field.dart';
 
 import 'package:flutter/material.dart';
 
@@ -270,10 +270,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     (password == confirmPassword)) {
                                   print('Signing click....');
                                   context.read<AuthBloc>().add(AuthSignUpEvent(
-                                      '$first $last',
-                                      phone,
-                                      email,
-                                      password));
+                                      '$first $last', phone, email, password));
                                 }
                               },
                               buttonWidth: double.infinity,

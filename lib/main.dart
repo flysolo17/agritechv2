@@ -1,5 +1,9 @@
 import 'package:agritechv2/repository/auth_repository.dart';
+import 'package:agritechv2/repository/cart_repository.dart';
 import 'package:agritechv2/repository/customer_repository.dart';
+import 'package:agritechv2/repository/pest_repository.dart';
+import 'package:agritechv2/repository/product_repository.dart';
+import 'package:agritechv2/repository/transaction_repository.dart';
 import 'package:agritechv2/styles/color_styles.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +30,18 @@ class MyApp extends StatelessWidget {
         ),
         RepositoryProvider(
           create: (context) => UserRepository(),
+        ),
+        RepositoryProvider(
+          create: (context) => ProductRepository(),
+        ),
+        RepositoryProvider(
+          create: (context) => CartRepository(),
+        ),
+        RepositoryProvider(
+          create: (context) => TransactionRepostory(),
+        ),
+        RepositoryProvider(
+          create: (context) => PestRepository(),
         ),
       ],
       child: BlocProvider(

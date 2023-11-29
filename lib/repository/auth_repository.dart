@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthRepository {
@@ -53,5 +52,30 @@ class AuthRepository {
     }
   }
 
-  
+  Future resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  Future<User> reAuthenticateUser(User user, String currentPassword) async {
+    try {
+      AuthCredential credential = EmailAuthProvider.credential(
+          email: user.email!, password: currentPassword);
+      await user.reauthenticateWithCredential(credential);
+      return user;
+    } catch (error) {
+      throw Exception(error.toString());
+    }
+  }
+
+  Future<void> changePassword(User user, String newPassword) async {
+    try {
+      await user.updatePassword(newPassword);
+    } catch (error) {
+      throw Exception(error.toString());
+    }
+  }
 }

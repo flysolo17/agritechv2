@@ -1,4 +1,4 @@
-import 'package:agritechv2/views/nav/bottom_nav.dart';
+import 'package:agritechv2/views/custom%20widgets/bottom_nav.dart';
 
 import 'package:flutter/material.dart';
 

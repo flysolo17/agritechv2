@@ -1,6 +1,6 @@
 import 'package:agritechv2/blocs/auth/auth_bloc.dart';
-import 'package:agritechv2/views/reusables/button.dart';
-import 'package:agritechv2/views/reusables/input_field.dart';
+import 'package:agritechv2/views/custom%20widgets/button.dart';
+import 'package:agritechv2/views/custom%20widgets/input_field.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -132,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () => context.push('/forgot-password'),
                           child: const Text("Forgot Password"),
                         )
                       ],

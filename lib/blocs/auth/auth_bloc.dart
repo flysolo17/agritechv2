@@ -25,6 +25,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogoutEvent>(_authLoggedOutEvent);
     on<AuthSendEmailVerification>(_onSendEmailVerification);
     on<AuthGetProfileEvent>(_onGetProfileEvent);
+    on<ForgotPassword>(_forgotPassword);
+    on<ReauthenticateUser>(_onReauthenticateUser);
+    on<ChangeUserPassword>(_onChangePassword);
     add(AuthUserChanged(_authRepository.currentUser));
   }
 
@@ -79,6 +82,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           name: event.name,
           email: event.email,
           phone: event.phone,
+          addresses: [],
         );
         print('Signing success....');
         emit(AuthSaveUserState(result, user));
@@ -111,7 +115,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (user != null) {
         emit(AuthLoadingState());
         await _authRepository.sendEmailVerification(user);
-        emit(AuthSuccessState(user));
+        emit(AuthSuccessState<User>(user));
       } else {
         emit(UnAthenticatedState());
       }
@@ -130,6 +134,41 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       } else {
         emit(UnAthenticatedState());
       }
+    } catch (e) {
+      emit(AuthFailedState(e.toString()));
+    }
+  }
+
+  Future<void> _forgotPassword(
+      ForgotPassword event, Emitter<AuthState> emit) async {
+    try {
+      emit(AuthLoadingState());
+      await _authRepository.resetPassword(event.email);
+      emit(AuthSuccessState<String>("We've sent an email to ${event.email}"));
+    } catch (e) {
+      emit(AuthFailedState(e.toString()));
+    }
+  }
+
+  Future<void> _onChangePassword(
+      ChangeUserPassword event, Emitter<AuthState> emit) async {
+    try {
+      emit(AuthLoadingState());
+      await _authRepository.changePassword(event.user, event.newPassword);
+      emit(AuthSuccessState<String>("Password changed successfully!"));
+    } catch (e) {
+      emit(AuthFailedState(e.toString()));
+    }
+  }
+
+  Future<void> _onReauthenticateUser(
+      ReauthenticateUser event, Emitter<AuthState> emit) async {
+    try {
+      emit(AuthLoadingState());
+      User user = await _authRepository.reAuthenticateUser(
+          _authRepository.currentUser!, event.currentPassword);
+      await Future.delayed(const Duration(seconds: 1));
+      add(ChangeUserPassword(user, event.newPassword));
     } catch (e) {
       emit(AuthFailedState(e.toString()));
     }

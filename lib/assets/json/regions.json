@@ -1,0 +1,87 @@
+[
+  {
+    "id": "15",
+    "name": "ARMM",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/15"
+  },
+  {
+    "id": "14",
+    "name": "CAR",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/14"
+  },
+  {
+    "id": "13",
+    "name": "NCR",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/13"
+  },
+  {
+    "id": "01",
+    "name": "REGION I ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/01"
+  },
+  {
+    "id": "02",
+    "name": "REGION II ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/02"
+  },
+  {
+    "id": "03",
+    "name": "REGION III ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/03"
+  },
+  {
+    "id": "04",
+    "name": "REGION IV-A ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/04"
+  },
+  {
+    "id": "17",
+    "name": "REGION IV-B ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/17"
+  },
+  {
+    "id": "09",
+    "name": "REGION IX ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/09"
+  },
+  {
+    "id": "05",
+    "name": "REGION V ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/05"
+  },
+  {
+    "id": "06",
+    "name": "REGION VI ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/06"
+  },
+  {
+    "id": "07",
+    "name": "REGION VII ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/07"
+  },
+  {
+    "id": "08",
+    "name": "REGION VIII ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/08"
+  },
+  {
+    "id": "10",
+    "name": "REGION X ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/10"
+  },
+  {
+    "id": "11",
+    "name": "REGION XI ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/11"
+  },
+  {
+    "id": "12",
+    "name": "REGION XII ",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/12"
+  },
+  {
+    "id": "16",
+    "name": "REGION XIII",
+    "href": "https://ph-locations-api.buonzz.com/v1/regions/16"
+  }
+]

@@ -1,0 +1,10 @@
+enum TransactionStatus {
+  PENDING,
+  ACCEPTED,
+  READY_TO_DELIVER,
+  READY_TO_PICK_UP,
+  OUT_OF_DELIVERY,
+  FAILED,
+  CANCELLED,
+  COMPLETED,
+}

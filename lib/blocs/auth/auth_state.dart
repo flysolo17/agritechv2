@@ -17,9 +17,9 @@ class UnAthenticatedState extends AuthState {}
 
 class AuthLoadingState extends AuthState {}
 
-class AuthSuccessState extends AuthState {
-  final User user;
-  AuthSuccessState(this.user);
+final class AuthSuccessState<T> extends AuthState {
+  final T data;
+  AuthSuccessState(this.data);
 }
 
 class AuthFailedState extends AuthState {
