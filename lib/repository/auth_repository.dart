@@ -20,10 +20,10 @@ class AuthRepository {
       } else if (e.code == 'email-already-in-use') {
         throw Exception("Email is already in use!");
       }
+      return null;
     } catch (e) {
       throw Exception(e.toString());
     }
-    return null;
   }
 
   Future<User?> login({required String email, required String password}) async {

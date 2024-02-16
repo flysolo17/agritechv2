@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Payment {
   num amount;
   PaymentType type;
@@ -56,7 +58,7 @@ class PaymentDetails {
       confirmedBy: json['confirmedBy'] as String,
       reference: json['reference'] as String,
       attachmentURL: json['attachmentURL'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: (json['createdAt'] as Timestamp).toDate(),
     );
   }
 
@@ -65,7 +67,7 @@ class PaymentDetails {
       'confirmedBy': confirmedBy,
       'reference': reference,
       'attachmentURL': attachmentURL,
-      'createdAt': createdAt.toIso8601String(),
+      'createdAt': Timestamp.fromDate(createdAt),
     };
   }
 }

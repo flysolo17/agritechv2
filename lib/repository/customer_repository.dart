@@ -4,7 +4,7 @@ import 'package:agritechv2/models/Address.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-import '../models/Customer.dart';
+import '../models/users/Customer.dart';
 
 class UserRepository {
   final FirebaseFirestore _firebaseFirestore;
@@ -33,17 +33,13 @@ class UserRepository {
         .map((snap) => Customer.fromJson(snap));
   }
 
-
   Future<Customer> getCustomerInfo(String userId) async {
     print('Getting user data from Cloud Firestore');
-    var snapshot = await _firebaseFirestore
-        .collection(COLLECTION_NAME)
-        .doc(userId)
-        .get();
+    var snapshot =
+        await _firebaseFirestore.collection(COLLECTION_NAME).doc(userId).get();
 
     return Customer.fromJson(snapshot);
   }
-
 
   Future<void> updateUser(Customer user) async {
     return _firebaseFirestore

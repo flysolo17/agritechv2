@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:agritechv2/blocs/customer/customer_bloc.dart';
 import 'package:agritechv2/blocs/transactions/transactions_bloc.dart';
 import 'package:agritechv2/models/Address.dart';
-import 'package:agritechv2/models/Customer.dart';
+import 'package:agritechv2/models/users/Customer.dart';
 import 'package:agritechv2/models/transaction/PaymentMethod.dart';
 import 'package:agritechv2/models/transaction/TransactionSchedule.dart';
 import 'package:agritechv2/models/transaction/TransactionType.dart';

@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:agritechv2/blocs/favorites/favorites_bloc.dart';
+import 'package:agritechv2/models/favorites/favorites.dart';
+import 'package:agritechv2/repository/favorites_repository.dart';
 import 'package:agritechv2/repository/product_repository.dart';
 
 import 'package:flutter/material.dart';
@@ -5,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../models/product/Products.dart';
+import '../../../repository/auth_repository.dart';
 import '../../../styles/color_styles.dart';
 import '../../../styles/text_styles.dart';
 import '../../custom widgets/featured_product_card.dart';
@@ -19,8 +25,10 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (context) => ProductRepository(),
+    return BlocProvider(
+      create: (context) => FavoritesBloc(
+          favoritesRepository: context.read<FavoritesRepository>(),
+          customerID: context.read<AuthRepository>().currentUser?.uid ?? ''),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -45,16 +53,21 @@ class _DashboardPageState extends State<DashboardPage> {
                   Expanded(
                     child: Column(
                       children: [
-                        Container(
-                          height: 70,
-                          width: 70,
-                          decoration: BoxDecoration(
-                            color: const Color(0XFFe5b2b2),
-                            borderRadius: BorderRadius.circular(13),
-                          ),
-                          child: const Icon(
-                            Icons.favorite,
-                            color: ColorStyle.brandRed,
+                        GestureDetector(
+                          onTap: () {
+                            context.push("/favorites");
+                          },
+                          child: Container(
+                            height: 70,
+                            width: 70,
+                            decoration: BoxDecoration(
+                              color: const Color(0XFFe5b2b2),
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            child: const Icon(
+                              Icons.favorite,
+                              color: ColorStyle.brandRed,
+                            ),
                           ),
                         ),
                         Text(
@@ -67,17 +80,20 @@ class _DashboardPageState extends State<DashboardPage> {
                   Expanded(
                     child: Column(
                       children: [
-                        Container(
-                          height: 70,
-                          width: 70,
-                          decoration: BoxDecoration(
-                            color: const Color(0XFFC7DBC7),
-                            borderRadius: BorderRadius.circular(13),
-                          ),
-                          child: Icon(
-                            Icons.shopping_bag,
-                            color: Colors.green.shade600,
-                            size: 35,
+                        GestureDetector(
+                          onTap: () => context.push('/inbox'),
+                          child: Container(
+                            height: 70,
+                            width: 70,
+                            decoration: BoxDecoration(
+                              color: const Color(0XFFC7DBC7),
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            child: Icon(
+                              Icons.shopping_bag,
+                              color: Colors.green.shade600,
+                              size: 35,
+                            ),
                           ),
                         ),
                         Text(

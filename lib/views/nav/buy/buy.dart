@@ -25,7 +25,13 @@ class BuyPage extends StatelessWidget {
         }
         if (snapshot.data != null) {
           var productsList = snapshot.data ?? [];
-          return ProductTabs(products: productsList);
+          if (productsList.isNotEmpty) {
+            return ProductTabs(products: productsList);
+          } else {
+            return const Center(
+              child: Text("No Products Yet!"),
+            );
+          }
         } else {
           return const Center(
             child: Text("Unknown error"),

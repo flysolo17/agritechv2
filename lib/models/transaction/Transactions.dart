@@ -11,6 +11,7 @@ import 'TransactionStatus.dart';
 class Transactions {
   String id;
   String customerID;
+  String driverID;
   String cashierID;
   TransactionType type;
   List<OrderItems> orderList;
@@ -25,6 +26,7 @@ class Transactions {
   Transactions({
     required this.id,
     required this.customerID,
+    required this.driverID,
     required this.cashierID,
     required this.type,
     required this.orderList,
@@ -72,6 +74,7 @@ class Transactions {
     return {
       'id': id,
       'customerID': customerID,
+      'driverID': driverID,
       'cashierID': cashierID,
       'type': type.toString().split('.').last,
       'orderList': orderList.map((item) => item.toJson()).toList(),
@@ -90,6 +93,7 @@ class Transactions {
     return Transactions(
         id: json['id'],
         customerID: json['customerID'],
+        driverID: json['driverID'],
         cashierID: json['cashierID'],
         type: TransactionType.values.firstWhere(
             (element) => element.toString().split(".").last == json['type']),

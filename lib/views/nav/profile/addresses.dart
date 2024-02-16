@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:agritechv2/blocs/auth/auth_bloc.dart';
 import 'package:agritechv2/blocs/customer/customer_bloc.dart';
 import 'package:agritechv2/models/Address.dart';
-import 'package:agritechv2/models/Customer.dart';
+import 'package:agritechv2/models/users/Customer.dart';
 import 'package:agritechv2/repository/auth_repository.dart';
 import 'package:agritechv2/repository/customer_repository.dart';
 import 'package:agritechv2/styles/color_styles.dart';

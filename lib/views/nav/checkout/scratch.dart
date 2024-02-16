@@ -1,7 +1,7 @@
 import 'package:agritechv2/blocs/customer/customer_bloc.dart';
 import 'package:agritechv2/blocs/transactions/transactions_bloc.dart';
 import 'package:agritechv2/models/Address.dart';
-import 'package:agritechv2/models/Customer.dart';
+import 'package:agritechv2/models/users/Customer.dart';
 import 'package:agritechv2/models/transaction/PaymentMethod.dart';
 import 'package:agritechv2/models/transaction/TransactionSchedule.dart';
 import 'package:agritechv2/models/transaction/TransactionType.dart';
@@ -92,7 +92,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
               });
             },
             itemBuilder: (BuildContext context) =>
-            <PopupMenuEntry<TransactionType>>[
+                <PopupMenuEntry<TransactionType>>[
               const PopupMenuItem<TransactionType>(
                 value: TransactionType.DELIVERY,
                 child: Text('DELIVERY'),
@@ -223,11 +223,11 @@ class _CheckOutPageState extends State<CheckOutPage> {
                           customerID: customer.id,
                           orderList: widget.orderItems,
                           shippingFee:
-                          _transactionType == TransactionType.DELIVERY
-                              ? ShippingFee(
-                              totalItems: _totalItems,
-                              shippingFee: _shipping)
-                              : null,
+                              _transactionType == TransactionType.DELIVERY
+                                  ? ShippingFee(
+                                      totalItems: _totalItems,
+                                      shippingFee: _shipping)
+                                  : null,
                           details: Details(
                               updatedBy: customer.name,
                               message: "Pending order",
@@ -267,13 +267,13 @@ class OrderDetails extends StatelessWidget {
   Function(int index, int value) changeQuantity;
   OrderDetails(
       {super.key,
-        required this.orderList,
-        required this.transactionType,
-        required this.schedule,
-        required this.total,
-        required this.shipping,
-        required this.totalWeight,
-        required this.changeQuantity});
+      required this.orderList,
+      required this.transactionType,
+      required this.schedule,
+      required this.total,
+      required this.shipping,
+      required this.totalWeight,
+      required this.changeQuantity});
 
   @override
   Widget build(BuildContext context) {
@@ -469,7 +469,6 @@ class ShippingDetails extends StatelessWidget {
   }
 }
 
-
 class PaymentTypeToggle extends StatefulWidget {
   final TransactionType transactionType; // Add TransactionType as a parameter
   Function(int type) paymentMethod;
@@ -504,8 +503,8 @@ class _PaymentTypeToggleState extends State<PaymentTypeToggle> {
             setState(() {
               widget.paymentMethod(index);
               for (int buttonIndex = 0;
-              buttonIndex < isSelected.length;
-              buttonIndex++) {
+                  buttonIndex < isSelected.length;
+                  buttonIndex++) {
                 if (buttonIndex == index) {
                   isSelected[buttonIndex] = true;
                 } else {
@@ -520,7 +519,7 @@ class _PaymentTypeToggleState extends State<PaymentTypeToggle> {
         borderRadius: BorderRadius.circular(10.0),
         disabledColor: Colors.grey,
         children:
-        _buildToggleButtonsChildren(), // Specify the color for disabled buttons
+            _buildToggleButtonsChildren(), // Specify the color for disabled buttons
       ),
     );
   }
@@ -582,15 +581,15 @@ class CheckoutActions extends StatefulWidget {
   final TransactionSchedule schedule;
   const CheckoutActions(
       {super.key,
-        required this.customerID,
-        required this.orderList,
-        required this.details,
-        required this.payment,
-        this.address,
-        this.shippingFee,
-        required this.message,
-        required this.transactionType,
-        required this.schedule});
+      required this.customerID,
+      required this.orderList,
+      required this.details,
+      required this.payment,
+      this.address,
+      this.shippingFee,
+      required this.message,
+      required this.transactionType,
+      required this.schedule});
 
   @override
   State<CheckoutActions> createState() => _CheckoutActionsState();
@@ -633,39 +632,39 @@ class _CheckoutActionsState extends State<CheckoutActions> {
         builder: (context, state) {
           return state is TransactionsLoadingState
               ? const Center(
-            child: CircularProgressIndicator(),
-          )
+                  child: CircularProgressIndicator(),
+                )
               : SizedBox(
-            width: double.infinity,
-            child: GestureDetector(
-              onTap: (!areAllItemsAboveMinimum(widget.orderList) &&
-                  widget.transactionType == TransactionType.DELIVERY)
-                  ? null
-                  : () {
-                placeOrder(context);
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: (!areAllItemsAboveMinimum(widget.orderList) &&
-                      widget.transactionType ==
-                          TransactionType.DELIVERY)
-                      ? Colors.grey
-                      : ColorStyle.brandRed,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                padding: const EdgeInsets.all(12.0),
-                child: const Center(
-                  child: Text(
-                    "Place order",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.0,
+                  width: double.infinity,
+                  child: GestureDetector(
+                    onTap: (!areAllItemsAboveMinimum(widget.orderList) &&
+                            widget.transactionType == TransactionType.DELIVERY)
+                        ? null
+                        : () {
+                            placeOrder(context);
+                          },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: (!areAllItemsAboveMinimum(widget.orderList) &&
+                                widget.transactionType ==
+                                    TransactionType.DELIVERY)
+                            ? Colors.grey
+                            : ColorStyle.brandRed,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      padding: const EdgeInsets.all(12.0),
+                      child: const Center(
+                        child: Text(
+                          "Place order",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-          );
+                );
         },
       ),
     );
@@ -673,17 +672,17 @@ class _CheckoutActionsState extends State<CheckoutActions> {
 
   void placeOrder(BuildContext context) {
     context.read<TransactionsBloc>().add(
-      CreateTransactionEvent(
-        widget.customerID,
-        widget.orderList,
-        widget.details,
-        widget.payment,
-        widget.shippingFee,
-        widget.message,
-        widget.transactionType,
-        widget.schedule,
-        widget.address,
-      ),
-    );
+          CreateTransactionEvent(
+            widget.customerID,
+            widget.orderList,
+            widget.details,
+            widget.payment,
+            widget.shippingFee,
+            widget.message,
+            widget.transactionType,
+            widget.schedule,
+            widget.address,
+          ),
+        );
   }
 }

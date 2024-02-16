@@ -1,4 +1,4 @@
-import 'package:agritechv2/models/Customer.dart';
+import 'package:agritechv2/models/users/Customer.dart';
 import 'package:agritechv2/repository/customer_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -76,6 +76,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       var result = await _authRepository.signup(
           email: event.email, password: event.password);
       if (result != null) {
+        print("AuthSign UP: ${result.uid}");
         var user = Customer(
           id: result.uid,
           profile: "",

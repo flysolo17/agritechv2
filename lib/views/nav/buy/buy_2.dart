@@ -18,10 +18,13 @@ import 'package:input_quantity/input_quantity.dart';
 
 import '../../../blocs/cart/cart_bloc.dart';
 
+import '../../../blocs/favorites/favorites_bloc.dart';
 import '../../../blocs/product/product_bloc.dart';
+import '../../../models/favorites/favorites.dart';
 import '../../../models/product/Products.dart';
 import '../../../models/product/Variations.dart';
 import '../../../repository/cart_repository.dart';
+import '../../../repository/favorites_repository.dart';
 import '../../../repository/product_repository.dart';
 import '../../../styles/text_styles.dart';
 import '../../../utils/Constants.dart';
@@ -44,6 +47,11 @@ class Buy2Page extends StatelessWidget {
           BlocProvider(
               create: (context) =>
                   CartBloc(cartRepository: context.read<CartRepository>())),
+          BlocProvider(
+              create: (context) => FavoritesBloc(
+                  favoritesRepository: context.read<FavoritesRepository>(),
+                  customerID:
+                      context.read<AuthRepository>().currentUser?.uid ?? '')),
         ],
         child: BlocConsumer<ProductBloc, ProductState>(
           listener: (context, state) {
@@ -60,6 +68,7 @@ class Buy2Page extends StatelessWidget {
               Products products = state.data;
               List<String> _images = state.data.images;
               List<Variation> variations = state.data.variations;
+
               return Column(
                 children: [
                   Expanded(
@@ -690,11 +699,63 @@ class SalesInfo extends StatelessWidget {
                   ),
                 ],
               ),
-              const Icon(Icons.favorite_border_outlined),
+              HeartIcon(productID: products.id)
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class HeartIcon extends StatelessWidget {
+  final String productID;
+  const HeartIcon({super.key, required this.productID});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Favorites>>(
+      stream: context.read<FavoritesBloc>().favoritesStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Icon(Icons.circle);
+        } else if (snapshot.hasError) {
+          return const Icon(Icons.error);
+        } else {
+          List<Favorites> favoritesList = snapshot.data ?? [];
+
+          bool isFavorite =
+              favoritesList.any((favorite) => favorite.productID == productID);
+
+          return isFavorite
+              ? IconButton(
+                  onPressed: () {
+                    context.read<FavoritesBloc>().add(RemoveFromFavorites(
+                        productID,
+                        context.read<AuthRepository>().currentUser?.uid ?? ''));
+                  },
+                  icon: const Icon(
+                    Icons.favorite,
+                    color: ColorStyle.brandRed,
+                  ))
+              : IconButton(
+                  onPressed: () {
+                    if (!isFavorite) {
+                      context.read<FavoritesBloc>().add(AddFavoritesEvent(
+                          Favorites(
+                              id: '',
+                              productID: productID,
+                              customerID: context
+                                      .read<AuthRepository>()
+                                      .currentUser
+                                      ?.uid ??
+                                  '',
+                              createdAt: DateTime.now())));
+                    }
+                  },
+                  icon: const Icon(Icons.favorite_border_outlined));
+        }
+      },
     );
   }
 }

@@ -61,7 +61,9 @@ dependencies:
   flutter_media_downloader: ^1.0.2
   url_launcher: ^6.2.1
   external_app_launcher: ^3.1.0
-
+  flutter_dotenv: ^5.1.0
+  chat_gpt_sdk: ^2.2.5
+  dash_chat_2: ^0.0.19
 
 dev_dependencies:
   flutter_test:
@@ -94,6 +96,7 @@ flutter:
     - lib/assets/svg_icons/
     - lib/assets/svg_icons/Bold/
     - lib/assets/svg_icons/Light/
+    - .env
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

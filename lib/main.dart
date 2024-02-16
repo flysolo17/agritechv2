@@ -1,20 +1,27 @@
+import 'package:agritechv2/repository/audit_repository.dart';
 import 'package:agritechv2/repository/auth_repository.dart';
 import 'package:agritechv2/repository/cart_repository.dart';
 import 'package:agritechv2/repository/customer_repository.dart';
+import 'package:agritechv2/repository/favorites_repository.dart';
+import 'package:agritechv2/repository/message_repository.dart';
 import 'package:agritechv2/repository/pest_repository.dart';
 import 'package:agritechv2/repository/product_repository.dart';
 import 'package:agritechv2/repository/transaction_repository.dart';
 import 'package:agritechv2/styles/color_styles.dart';
+import 'package:agritechv2/views/nav/bot/bot.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'blocs/auth/auth_bloc.dart';
+import 'blocs/messenger/messenger_bloc.dart';
 import 'config/router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
@@ -43,12 +50,30 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(
           create: (context) => PestRepository(),
         ),
-      ],
-      child: BlocProvider(
-        create: (context) => AuthBloc(
-          authRepository: context.read<AuthRepository>(),
-          userRepository: context.read<UserRepository>(),
+        RepositoryProvider(
+          create: (context) => FavoritesRepository(),
         ),
+        RepositoryProvider(
+          create: (context) => AuditRepository(),
+        ),
+        RepositoryProvider(
+          create: (context) => MessagesRepository(),
+        ),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => AuthBloc(
+              authRepository: context.read<AuthRepository>(),
+              userRepository: context.read<UserRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => MessengerBloc(
+                messagesRepository: context.read<MessagesRepository>(),
+                myID: context.read<AuthRepository>().currentUser?.uid ?? ''),
+          ),
+        ],
         child: MaterialApp.router(
           title: 'Flutter Demo',
           debugShowCheckedModeBanner: false,

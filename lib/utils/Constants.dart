@@ -1,6 +1,7 @@
 import 'package:agritechv2/models/transaction/OrderItems.dart';
 import 'package:agritechv2/models/transaction/TransactionSchedule.dart';
 import 'package:agritechv2/models/transaction/TransactionStatus.dart';
+import 'package:agritechv2/models/users/Users.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
@@ -12,7 +13,7 @@ import '../models/product/Shipping.dart';
 import '../models/transaction/PaymentMethod.dart';
 
 const GCASH_LINK =
-    "https://firebasestorage.googleapis.com/v0/b/agri-bot-75fb6.appspot.com/o/gcash.jpg?alt=media&token=d927f21f-9c81-41a4-a561-68b262940787";
+    "https://firebasestorage.googleapis.com/v0/b/agri-bot-75fb6.appspot.com/o/gcash.jpg?alt=media&token=11475363-e37d-4442-b4d6-5e2542181245";
 const GCASH_APP =
     "https://play.google.com/store/apps/details?id=com.globe.gcash.android&pcampaignid=web_share";
 const int STANDARD_DELIVERY = 10;
@@ -191,6 +192,44 @@ Shimmer shimmerLoading1() {
   );
 }
 
+Shimmer usersShimer() {
+  return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        height: 150,
+        width: double.infinity,
+        child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.all(8),
+            itemCount: 10,
+            itemBuilder: (BuildContext context, int index) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 8.0,
+                  ),
+                  Container(
+                    width: 100.0,
+                    height: 10,
+                    color: Colors.grey,
+                  )
+                ],
+              );
+            }),
+      ));
+}
+
 Shimmer shimmerLoading2() {
   return Shimmer.fromColors(
     baseColor: Colors.grey.shade300,
@@ -355,4 +394,37 @@ String generateInvoiceID() {
   String invoiceID = '$timestamp${randomPart.toString().padLeft(5, '0')}';
 
   return invoiceID;
+}
+
+Users? findUserById(List<Users> userList, String userId) {
+  try {
+    return userList.firstWhere((user) => user.id == userId);
+  } catch (e) {
+    // Handle exceptions if necessary
+    print('Error finding user: $e');
+    return null;
+  }
+}
+
+String formatTimeDifference(DateTime dateTime) {
+  Duration difference = DateTime.now().difference(dateTime);
+
+  if (difference.inDays > 365) {
+    int years = (difference.inDays / 365).floor();
+    return '$years ${years == 1 ? 'year' : 'years'} ago';
+  } else if (difference.inDays >= 30) {
+    int months = (difference.inDays / 30).floor();
+    return '$months ${months == 1 ? 'month' : 'months'} ago';
+  } else if (difference.inDays >= 7) {
+    int weeks = (difference.inDays / 7).floor();
+    return '$weeks ${weeks == 1 ? 'week' : 'weeks'} ago';
+  } else if (difference.inDays > 0) {
+    return '${difference.inDays} ${difference.inDays == 1 ? 'day' : 'days'} ago';
+  } else if (difference.inHours > 0) {
+    return '${difference.inHours} ${difference.inHours == 1 ? 'hour' : 'hours'} ago';
+  } else if (difference.inMinutes > 0) {
+    return '${difference.inMinutes} ${difference.inMinutes == 1 ? 'min' : 'mins'} ago';
+  } else {
+    return 'just now';
+  }
 }

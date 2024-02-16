@@ -4,7 +4,7 @@ import 'package:agritechv2/models/Address.dart';
 import 'package:agritechv2/models/transaction/ShippingFee.dart';
 import 'package:agritechv2/models/transaction/TransactionSchedule.dart';
 import 'package:agritechv2/models/transaction/TransactionType.dart';
-import 'package:agritechv2/utils/Constants.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -37,6 +37,7 @@ class TransactionRepostory {
     final Transactions transaction = Transactions(
       id: transactionID,
       customerID: customerID,
+      driverID: '',
       cashierID: "",
       type: transactionType,
       orderList: orderList,

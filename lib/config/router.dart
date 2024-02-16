@@ -1,25 +1,31 @@
 import 'dart:convert';
 
 import 'package:agritechv2/models/Address.dart';
-import 'package:agritechv2/models/Customer.dart';
+import 'package:agritechv2/models/users/Customer.dart';
 import 'package:agritechv2/models/pest/pest_map.dart';
 import 'package:agritechv2/models/product/Cart.dart';
 import 'package:agritechv2/models/transaction/OrderItems.dart';
 import 'package:agritechv2/models/transaction/PaymentMethod.dart';
 import 'package:agritechv2/models/transaction/Transactions.dart';
+import 'package:agritechv2/models/users/Users.dart';
 
 import 'package:agritechv2/views/auth/change_password.dart';
 import 'package:agritechv2/views/auth/forgot_password.dart';
 import 'package:agritechv2/views/calcu/calculator.dart';
 import 'package:agritechv2/views/custom%20widgets/bottom_nav.dart';
+
 import 'package:agritechv2/views/nav/checkout/gcash_payment.dart';
-import 'package:agritechv2/views/home.dart';
+
 import 'package:agritechv2/views/nav/buy/buy_2.dart';
 import 'package:agritechv2/views/nav/cart/cart.dart';
-import 'package:agritechv2/views/nav/cart/cart_item.dart';
+
 import 'package:agritechv2/views/nav/checkout/checkout.dart';
+import 'package:agritechv2/views/nav/favorites/favorites.dart';
+import 'package:agritechv2/views/nav/inbox/inbox.dart';
 import 'package:agritechv2/views/nav/map/view_pest_map.dart';
 import 'package:agritechv2/views/nav/map/view_topic.dart';
+import 'package:agritechv2/views/nav/messages/conversation.dart';
+import 'package:agritechv2/views/nav/messages/messages.dart';
 import 'package:agritechv2/views/nav/order/cancel_order.dart';
 import 'package:agritechv2/views/nav/order/my_order.dart';
 import 'package:agritechv2/views/nav/order/view_order.dart';
@@ -73,7 +79,7 @@ class AppRouter {
       GoRoute(
         path: '/',
         builder: (BuildContext context, GoRouterState state) {
-          return MainNavigation();
+          return const MainNavigation();
         },
         routes: <RouteBase>[
           GoRoute(
@@ -83,9 +89,35 @@ class AppRouter {
             },
           ),
           GoRoute(
+            path: 'messages',
+            builder: (BuildContext context, GoRouterState state) {
+              return const MessagesPage();
+            },
+          ),
+          GoRoute(
+            path: 'conversation',
+            builder: (BuildContext context, GoRouterState state) {
+              return ConversationPage(
+                users: state.extra as Users,
+              );
+            },
+          ),
+          GoRoute(
             path: 'my-orders',
             builder: (BuildContext context, GoRouterState state) {
               return const MyOrdersPage();
+            },
+          ),
+          GoRoute(
+            path: 'favorites',
+            builder: (BuildContext context, GoRouterState state) {
+              return const FavoritesPage();
+            },
+          ),
+          GoRoute(
+            path: 'inbox',
+            builder: (BuildContext context, GoRouterState state) {
+              return const InboxPage();
             },
           ),
           GoRoute(

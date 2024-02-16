@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:agritechv2/blocs/transactions/transactions_bloc.dart';
-import 'package:agritechv2/models/Customer.dart';
+import 'package:agritechv2/models/users/Customer.dart';
 import 'package:agritechv2/models/transaction/PaymentMethod.dart';
 import 'package:agritechv2/models/transaction/TransactionDetails.dart';
 import 'package:agritechv2/repository/transaction_repository.dart';
@@ -35,6 +35,27 @@ class GcashPayment extends StatefulWidget {
 class _GcashPaymentState extends State<GcashPayment> {
   String _receipt = 'lib/assets/images/receipt.png';
   File? _selectedFile = null;
+  // Future<void> getImageUrl(String imagePath) async {
+  //   try {
+  //     // Reference to an image file in Firebase Storage
+  //     Reference ref = FirebaseStorage.instance.ref().child("gcash.jpg");
+
+  //     // Get the download URL
+  //     String imageUrl = await ref.getDownloadURL();
+
+  //     print('GCASH : $imageUrl');
+  //   } catch (e) {
+  //     print('Error getting image URL: $e');
+  //     rethrow;
+  //   }
+  // }
+
+  // @override
+  // void initState() {
+  //   getImageUrl("");
+  //   super.initState();
+  // }
+
   @override
   Widget build(BuildContext context) {
     final _flutterMediaDownloaderPlugin = MediaDownload();

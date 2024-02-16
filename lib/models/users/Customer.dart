@@ -2,38 +2,38 @@ import 'package:agritechv2/models/Address.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Customer {
-  Customer({
-    required this.id,
-    required this.profile,
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.addresses, // Add the addresses field
-  });
-
   String id;
   String profile;
   String name;
   String email;
   String phone;
   List<Address> addresses;
-  Customer copyWith({
-    String? id,
-    String? profile,
-    String? name,
-    String? email,
-    String? phone,
-    List<Address>? addresses,
-  }) {
-    return Customer(
-      id: id ?? this.id,
-      profile: profile ?? this.profile,
-      name: name ?? this.name,
-      email: email ?? this.email,
-      phone: phone ?? this.phone,
-      addresses: addresses ?? this.addresses,
-    );
-  }
+  Customer({
+    required this.id,
+    required this.profile,
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.addresses,
+  });
+
+  // Customer copyWith({
+  //   String? id,
+  //   String? profile,
+  //   String? name,
+  //   String? email,
+  //   String? phone,
+  //   List<Address>? addresses,
+  // }) {
+  //   return Customer(
+  //     id: id ?? this.id,
+  //     profile: profile ?? this.profile,
+  //     name: name ?? this.name,
+  //     email: email ?? this.email,
+  //     phone: phone ?? this.phone,
+  //     addresses: addresses ?? this.addresses,
+  //   );
+  // }
 
   Address? getDefaultAddress() {
     Address? address;
@@ -44,8 +44,9 @@ class Customer {
     }
     return address;
   }
-  factory Customer.fromJson(DocumentSnapshot snap) {
-    final List<dynamic> addressesData = snap['addresses'] ?? [];
+
+  factory Customer.fromJson(DocumentSnapshot<Map<String, dynamic>> json) {
+    final List<dynamic> addressesData = json['addresses'] ?? [];
 
     final List<Address> parsedAddresses = addressesData.map((addressData) {
       final Contact contact = Contact.fromJson(addressData['contact']);
@@ -64,18 +65,18 @@ class Customer {
     }).toList();
 
     return Customer(
-      id: snap.id,
-      profile: snap['profile'],
-      name: snap['name'],
-      email: snap['email'],
-      phone: snap['phone'],
+      id: json.id,
+      profile: json['profile'],
+      name: json['name'],
+      email: json['email'],
+      phone: json['phone'],
       addresses: parsedAddresses,
     );
   }
 
   Map<String, Object> toJson() {
     final List<Map<String, Object>> addressesData = addresses.map((address) {
-      // Get the JSON representation of the contact object
+    
       final Map<String, dynamic> contactData = address.contact.toJson();
 
       return {
@@ -92,6 +93,7 @@ class Customer {
     }).toList();
 
     return {
+      'id': id,
       'profile': profile,
       'name': name,
       'email': email,

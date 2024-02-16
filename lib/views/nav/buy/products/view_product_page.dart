@@ -1,4 +1,8 @@
 import 'package:agritechv2/blocs/cart/cart_bloc.dart';
+import 'package:agritechv2/blocs/favorites/favorites_bloc.dart';
+import 'package:agritechv2/models/favorites/favorites.dart';
+import 'package:agritechv2/repository/auth_repository.dart';
+import 'package:agritechv2/repository/favorites_repository.dart';
 
 import 'package:agritechv2/styles/color_styles.dart';
 import 'package:agritechv2/views/custom%20widgets/cart_action.dart';
@@ -70,6 +74,11 @@ class _ViewProductPageState extends State<ViewProductPage> {
             create: (context) =>
                 CartBloc(cartRepository: context.read<CartRepository>()),
           ),
+          BlocProvider(
+              create: (context) => FavoritesBloc(
+                  favoritesRepository: context.read<FavoritesRepository>(),
+                  customerID:
+                      context.read<AuthRepository>().currentUser?.uid ?? '')),
         ],
         child: BlocConsumer<ProductBloc, ProductState>(
           listener: (context, state) {
@@ -369,7 +378,35 @@ class SalesInfo extends StatelessWidget {
                   ),
                 ],
               ),
-              const Icon(Icons.favorite_border_outlined),
+              BlocBuilder<FavoritesBloc, FavoritesState>(
+                builder: (context, state) {
+                  if (state is FavoritesSuccessState<List<Favorites>>) {
+                    final List<Favorites> favoriteList = state.data ?? [];
+
+                    bool isFavorite = favoriteList
+                        .any((favorite) => favorite.productID == products.id);
+
+                    return isFavorite
+                        ? const Icon(Icons.favorite)
+                        : GestureDetector(
+                            onTap: () {
+                              context.read<FavoritesBloc>().add(
+                                  AddFavoritesEvent(Favorites(
+                                      id: '',
+                                      productID: products.id,
+                                      customerID: context
+                                              .read<AuthRepository>()
+                                              .currentUser
+                                              ?.uid ??
+                                          '',
+                                      createdAt: DateTime.now())));
+                            },
+                            child: const Icon(Icons.favorite_border_outlined));
+                  }
+                  print(state);
+                  return const Icon(Icons.favorite_border_outlined);
+                },
+              ),
             ],
           ),
         ],
