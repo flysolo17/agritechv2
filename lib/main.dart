@@ -4,6 +4,7 @@ import 'package:agritechv2/repository/cart_repository.dart';
 import 'package:agritechv2/repository/customer_repository.dart';
 import 'package:agritechv2/repository/favorites_repository.dart';
 import 'package:agritechv2/repository/message_repository.dart';
+import 'package:agritechv2/repository/newsletter.dart';
 import 'package:agritechv2/repository/pest_repository.dart';
 import 'package:agritechv2/repository/product_repository.dart';
 import 'package:agritechv2/repository/transaction_repository.dart';
@@ -58,6 +59,9 @@ class MyApp extends StatelessWidget {
         ),
         RepositoryProvider(
           create: (context) => MessagesRepository(),
+        ),
+        RepositoryProvider(
+          create: (context) => NewsletterRepository(),
         ),
       ],
       child: MultiBlocProvider(

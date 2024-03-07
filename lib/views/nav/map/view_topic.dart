@@ -1,22 +1,33 @@
+import 'dart:io';
+
 import 'package:agritechv2/models/pest/pest_map.dart';
 import 'package:agritechv2/models/product/Products.dart';
 import 'package:agritechv2/repository/product_repository.dart';
+import 'package:dio/dio.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_media_downloader/flutter_media_downloader.dart';
+
 import 'package:go_router/go_router.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../styles/color_styles.dart';
 import '../../../utils/Constants.dart';
 
 class ViewTopic extends StatelessWidget {
-  final Topic topic;
-  const ViewTopic({super.key, required this.topic});
+  final PestMap map;
+  const ViewTopic({super.key, required this.map});
 
   @override
   Widget build(BuildContext context) {
+    print(map.recomendations);
     return Scaffold(
       appBar: AppBar(
-        title: Text(topic.title),
+        title: Text(""),
         centerTitle: true,
         backgroundColor: ColorStyle.brandRed,
       ),
@@ -25,13 +36,13 @@ class ViewTopic extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.network(
-              topic.image,
+              map.image,
               width: double.infinity,
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                topic.title,
+                map.title,
                 style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -40,14 +51,19 @@ class ViewTopic extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(topic.desc),
+              child: Text(map.desc),
             ),
             ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: topic.contents.length,
+                itemCount: map.contents.length,
                 itemBuilder: (context, index) {
-                  final content = topic.contents[index];
+                  final content = map.contents[index];
+                  final lastIndex = map.contents.length - 1;
+                  if (lastIndex == index &&
+                      map.contents[lastIndex].image.isNotEmpty) {
+                    return ProgramCard(contents: content);
+                  }
                   return ContentContainer(contents: content);
                 }),
             const Padding(
@@ -60,15 +76,97 @@ class ViewTopic extends StatelessWidget {
             ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: topic.recomendations.length,
+                itemCount: map.recomendations.length,
                 itemBuilder: (context, index) {
-                  final productID = topic.recomendations[index];
+                  final productID = map.recomendations[index];
+                  print(productID);
                   return SuggestedProducts(productID: productID);
                 }),
           ],
         ),
       ),
     );
+  }
+}
+
+class ProgramCard extends StatefulWidget {
+  final Contents contents;
+  const ProgramCard({super.key, required this.contents});
+
+  @override
+  State<ProgramCard> createState() => _ProgramCardState();
+}
+
+class _ProgramCardState extends State<ProgramCard> {
+  final storageRef = FirebaseStorage.instance;
+  String imageURL = '';
+  final _flutterMediaDownloaderPlugin = MediaDownload();
+  bool isDownloading = false; // Add this line
+
+  Future<void> downloadFile(Reference ref) async {
+    try {
+      final Directory tempDir = await getTemporaryDirectory();
+      final url = await ref.getDownloadURL();
+      // Construct the destination file path in the Downloads directory
+      String path = '${tempDir.path}/${ref.name}.png'; // add ref.
+
+      // Download the file to the destination file path
+      await Dio().download(url, path);
+      final result = await ImageGallerySaver.saveFile(path);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('File downloaded successfully to: $path'),
+        ),
+      );
+    } catch (e) {
+      print('Error downloading file: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "S&P Crop Program",
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  fontSize: 20),
+            ),
+            TextButton(
+              onPressed: () async {
+                final ref = storageRef.refFromURL(widget.contents.image);
+                downloadFile(ref);
+              },
+              child: Text(
+                "Download",
+                style: TextStyle(
+                  color: isDownloading
+                      ? Colors.grey
+                      : Colors.green, // Update this line
+                ),
+              ),
+            )
+          ],
+        ),
+        Image.network(widget.contents.image)
+      ],
+    );
+  }
+
+  Future<void> _downloadImage(String imageUrl) async {
+    print("Clickedddddd");
+    try {
+      _flutterMediaDownloaderPlugin.downloadMedia(context, imageUrl);
+    } catch (e) {
+      print('Error downloading image: $e');
+    }
   }
 }
 
@@ -120,7 +218,8 @@ class SuggestedProducts extends StatelessWidget {
           );
         } else if (snapshot.hasData) {
           final product = snapshot.data;
-
+          print(product);
+          print("jm");
           return ListTile(
             onTap: () {
               context.push("/product/${product.id}");

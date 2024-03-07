@@ -224,46 +224,6 @@ class TransactionsContainer extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
-                if (transactions.status == TransactionStatus.PENDING)
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ColorStyle.brandRed,
-                          ),
-                          onPressed: () {
-                            context.push('/cancel', extra: transactions);
-                          },
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      if (transactions.payment.status == PaymentStatus.UNPAID)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: ColorStyle.brandGreen,
-                            ),
-                            onPressed: () {
-                              context.push('/gcash-payment', extra: {
-                                'transactionID': transactions.id,
-                                'payment': jsonEncode(transactions.payment),
-                                'customer': customer.name
-                              });
-                            },
-                            child: const Text(
-                              'Pay now',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
                 if (transactions.status == TransactionStatus.COMPLETED)
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -278,7 +238,49 @@ class TransactionsContainer extends StatelessWidget {
                     ),
                   ),
               ],
-            )
+            ),
+            if (transactions.status == TransactionStatus.PENDING)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorStyle.brandRed,
+                      ),
+                      onPressed: () {
+                        context.push('/cancel', extra: transactions);
+                      },
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  if (transactions.payment.status == PaymentStatus.UNPAID)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorStyle.brandGreen,
+                        ),
+                        onPressed: () {
+                          context.push('/gcash-payment', extra: {
+                            'transactionID': transactions.id,
+                            'payment': jsonEncode(transactions.payment),
+                            'customer': customer.name
+                          });
+                        },
+                        child: const Text(
+                          'Pay now',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
           ],
         ),
       ),

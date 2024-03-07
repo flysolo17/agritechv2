@@ -11,10 +11,11 @@ class PestRepository {
     FirebaseFirestore? firebaseFirestore,
   }) : _firebaseFirestore = firebaseFirestore ?? FirebaseFirestore.instance {}
 
-  Stream<List<PestMap>> getAllPestMap() {
+  Stream<List<PestMap>> getAllPestMap(String topic) {
     return _firebaseFirestore
         .collection(COLLECTION_NAME)
-        .orderBy('createdAt')
+        .where('topic', isEqualTo: topic)
+        .orderBy('createdAt', descending: true)
         .snapshots()
         .map((QuerySnapshot<Map<String, dynamic>> snapshot) {
       return snapshot.docs.map((DocumentSnapshot<Map<String, dynamic>> doc) {

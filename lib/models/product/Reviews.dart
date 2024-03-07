@@ -1,4 +1,4 @@
-import 'package:agritechv2/models/pest/pest_map.dart';
+import 'package:agritechv2/models/product/Comments.dart';
 
 class Reviews {
   String id;

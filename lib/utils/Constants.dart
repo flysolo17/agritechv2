@@ -28,6 +28,13 @@ PaymentType getSelectedPaymentMethod(int selectedIndex) {
   }
 }
 
+int countOrder(List<OrderItems> orderItems) {
+  int total = 0;
+  orderItems.map((prod) => {total += prod.quantity});
+  return total;
+}
+
+// if orderITems total quantity > 50 return true else checkMinimum quantity
 bool areAllItemsAboveMinimum(List<OrderItems> orderItems) {
   for (OrderItems item in orderItems) {
     if (item.quantity < item.shippingInfo.minimum) {

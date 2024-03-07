@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:agritechv2/blocs/customer/customer_bloc.dart';
 import 'package:agritechv2/blocs/transactions/transactions_bloc.dart';
@@ -68,6 +69,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
           : 0;
 
       _shipping = computeShipping(widget.orderItems);
+      print(areAllItemsAboveMinimum(widget.orderItems));
     });
   }
 
@@ -608,6 +610,7 @@ class _CheckoutActionsState extends State<CheckoutActions> {
 
   @override
   Widget build(BuildContext context) {
+    print('${areAllItemsAboveMinimum(widget.orderList)}');
     return BlocProvider(
       create: (context) => TransactionsBloc(
           transactionRepostory: context.read<TransactionRepostory>()),
@@ -637,19 +640,30 @@ class _CheckoutActionsState extends State<CheckoutActions> {
               : SizedBox(
                   width: double.infinity,
                   child: GestureDetector(
-                    onTap: (!areAllItemsAboveMinimum(widget.orderList) &&
-                            widget.transactionType == TransactionType.DELIVERY)
-                        ? null
-                        : () {
-                            placeOrder(context);
-                          },
+                    onTap: () {
+                      if (countOrders(widget.orderList) < 50) {
+                        if (areAllItemsAboveMinimum(widget.orderList) ==
+                                false &&
+                            widget.transactionType ==
+                                TransactionType.DELIVERY) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                              content: Text(
+                                  "Order is less than the minimum requirements")));
+                          return;
+                        }
+                      }
+                      if (widget.transactionType == TransactionType.DELIVERY &&
+                          widget.address == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("Please add address")));
+                        return;
+                      }
+                      placeOrder(context);
+                    },
                     child: Container(
                       decoration: BoxDecoration(
-                        color: (!areAllItemsAboveMinimum(widget.orderList) &&
-                                widget.transactionType ==
-                                    TransactionType.DELIVERY)
-                            ? Colors.grey
-                            : ColorStyle.brandRed,
+                        color: ColorStyle.brandRed,
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       padding: const EdgeInsets.all(12.0),

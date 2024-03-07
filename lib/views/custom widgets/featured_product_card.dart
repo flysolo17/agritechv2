@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../models/product/Products.dart';
+import '../../models/transaction/OrderItems.dart';
 
 class FeaturedProductCard extends StatelessWidget {
   final Products product;
@@ -10,8 +13,22 @@ class FeaturedProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isVariation = product.variations.isEmpty ? false : true;
+    OrderItems orderItems = OrderItems(
+        productID: product.id,
+        productName: product.name,
+        isVariation: isVariation,
+        variationID: isVariation ? product.variations[0].id : "",
+        quantity: 1,
+        cost: isVariation ? product.variations[0].cost : product.cost,
+        price: isVariation ? product.variations[0].price : product.price,
+        imageUrl: product.images[0],
+        shippingInfo: product.shippingInformation);
+    List<OrderItems> orderList = [orderItems];
+
     return GestureDetector(
-      onTap: () => context.go('/product/${product.id}'),
+      onTap: () => context.push('/checkout',
+          extra: jsonEncode(orderList.map((e) => e.toJson()).toList())),
       child: Container(
         height: double.infinity,
         width: double.infinity,

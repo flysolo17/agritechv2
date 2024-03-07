@@ -59,155 +59,162 @@ class _GcashPaymentState extends State<GcashPayment> {
   @override
   Widget build(BuildContext context) {
     final _flutterMediaDownloaderPlugin = MediaDownload();
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Gcash Payment"),
-        backgroundColor: ColorStyle.brandRed,
-      ),
-      body: BlocProvider(
-        create: (context) => TransactionsBloc(
-            transactionRepostory: context.read<TransactionRepostory>()),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(15.0),
-                  child: Text(
-                    "To Procceed with Gcash Payment please download our Agritech Gcash Code below.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14),
+    return WillPopScope(
+      onWillPop: () async {
+        context.pop();
+        context.pop();
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Gcash Payment"),
+          backgroundColor: ColorStyle.brandRed,
+        ),
+        body: BlocProvider(
+          create: (context) => TransactionsBloc(
+              transactionRepostory: context.read<TransactionRepostory>()),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Text(
+                      "To Procceed with Gcash Payment please download our Agritech Gcash Code below.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Image.network(
-                    GCASH_LINK,
-                    height: 200,
-                    width: 250,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.network(
+                      GCASH_LINK,
+                      height: 200,
+                      width: 250,
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorStyle.brandRed),
+                        onPressed: () async {
+                          _flutterMediaDownloaderPlugin.downloadMedia(
+                              context, GCASH_LINK);
+                        },
+                        child: const Text(
+                          'Download QR Code',
+                          style: TextStyle(color: Colors.white),
+                        )),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Text(
+                      "Next is OPEN GCASH application and pay for the ammount of:",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Text(
+                      formatPrice(widget.payment.amount).toString(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Text(
+                      "Using the QR Code you just Downloaded",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Text(
+                      "The amount you paid serve as your full payment",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           backgroundColor: ColorStyle.brandRed),
                       onPressed: () async {
-                        _flutterMediaDownloaderPlugin.downloadMedia(
-                            context, GCASH_LINK);
+                        var openAppResult = await LaunchApp.openApp(
+                          androidPackageName: 'com.globe.gcash.android',
+                          appStoreLink:
+                              'https://play.google.com/store/apps/details?id=com.globe.gcash.android&pcampaignid=web_share',
+                          // openStore: false
+                        );
+                        print(
+                            'openAppResult => $openAppResult ${openAppResult.runtimeType}');
                       },
                       child: const Text(
-                        'Download QR Code',
+                        'Open GCash',
                         style: TextStyle(color: Colors.white),
-                      )),
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(15.0),
-                  child: Text(
-                    "Next is OPEN GCASH application and pay for the ammount of:",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Text(
-                    formatPrice(widget.payment.amount).toString(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(15.0),
-                  child: Text(
-                    "Using the QR Code you just Downloaded",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(15.0),
-                  child: Text(
-                    "The amount you paid serve as your full payment",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: ColorStyle.brandRed),
-                    onPressed: () async {
-                      var openAppResult = await LaunchApp.openApp(
-                        androidPackageName: 'com.globe.gcash.android',
-                        appStoreLink:
-                            'https://play.google.com/store/apps/details?id=com.globe.gcash.android&pcampaignid=web_share',
-                        // openStore: false
-                      );
-                      print(
-                          'openAppResult => $openAppResult ${openAppResult.runtimeType}');
-                    },
-                    child: const Text(
-                      'Open GCash',
-                      style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(15.0),
-                  child: Text(
-                    "After that DOWNLOAD or SCREENSHOT the reference number of your payment from gcash and upload it here:",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: _selectedFile != null
-                      ? Image.file(_selectedFile!)
-                      : Image.asset(_receipt),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: ColorStyle.brandRed),
-                    onPressed: () async {
-                      final image = await ImagePicker()
-                          .pickImage(source: ImageSource.gallery);
-                      if (image != null) {
-                        setState(() {
-                          File file = File(image.path);
-                          _selectedFile = file;
-                        });
-                      } else {
-                        print('create quiz page : error picking image');
-                      }
-                    },
-                    child: const Text(
-                      'Upload Receipt',
-                      style: TextStyle(color: Colors.white),
+                  const Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Text(
+                      "After that DOWNLOAD or SCREENSHOT the reference number of your payment from gcash and upload it here:",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
                     ),
                   ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(15.0),
-                  child: Text(
-                    "Once Everything looks good you can now pay your order.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: _selectedFile != null
+                        ? Image.file(_selectedFile!)
+                        : Image.asset(_receipt),
                   ),
-                ),
-                if (_selectedFile != null)
-                  ConfirmPayment(
-                      file: _selectedFile!,
-                      transactionID: widget.transactionID,
-                      payment: widget.payment,
-                      customerName: widget.customer)
-              ],
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorStyle.brandRed),
+                      onPressed: () async {
+                        final image = await ImagePicker()
+                            .pickImage(source: ImageSource.gallery);
+                        if (image != null) {
+                          setState(() {
+                            File file = File(image.path);
+                            _selectedFile = file;
+                          });
+                        } else {
+                          print('create quiz page : error picking image');
+                        }
+                      },
+                      child: const Text(
+                        'Upload Receipt',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Text(
+                      "Once Everything looks good you can now pay your order.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                  if (_selectedFile != null)
+                    ConfirmPayment(
+                        file: _selectedFile!,
+                        transactionID: widget.transactionID,
+                        payment: widget.payment,
+                        customerName: widget.customer)
+                ],
+              ),
             ),
           ),
         ),

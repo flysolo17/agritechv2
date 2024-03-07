@@ -210,21 +210,19 @@ class AppRouter {
           GoRoute(
             path: 'view-pest-map',
             builder: (BuildContext context, GoRouterState state) {
-              PestMap pest =
-                  PestMap.fromJson(jsonDecode(state.extra.toString()));
-
+              String topic = state.extra.toString();
               return ViewPestMapPage(
-                pestMap: pest,
+                topic: topic,
               );
             },
           ),
           GoRoute(
             path: 'view-pest-map-topic',
             builder: (BuildContext context, GoRouterState state) {
-              Topic topic = Topic.fromJson(jsonDecode(state.extra.toString()));
+              PestMap topic = state.extra as PestMap;
 
               return ViewTopic(
-                topic: topic,
+                map: topic,
               );
             },
           ),
