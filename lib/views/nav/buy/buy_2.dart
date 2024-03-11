@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:agritechv2/blocs/auth/auth_bloc.dart';
+import 'package:agritechv2/models/ReviewWithCustomer.dart';
 import 'package:agritechv2/models/product/Cart.dart';
 import 'package:agritechv2/models/product/Shipping.dart';
 import 'package:agritechv2/models/transaction/OrderItems.dart';
 
 import 'package:agritechv2/repository/auth_repository.dart';
+import 'package:agritechv2/repository/review_repository.dart';
 import 'package:agritechv2/styles/color_styles.dart';
 import 'package:agritechv2/views/custom%20widgets/cart_action.dart';
 import 'package:agritechv2/views/nav/buy/buy_now.dart';
@@ -30,9 +32,33 @@ import '../../../repository/product_repository.dart';
 import '../../../styles/text_styles.dart';
 import '../../../utils/Constants.dart';
 
-class Buy2Page extends StatelessWidget {
+class Buy2Page extends StatefulWidget {
   final String productID;
   const Buy2Page({super.key, required this.productID});
+
+  @override
+  State<Buy2Page> createState() => _Buy2PageState();
+}
+
+class _Buy2PageState extends State<Buy2Page> {
+  List<ReviewWithCustomer> _reviews = [];
+
+  @override
+  void initState() {
+    initReviewStreams(widget.productID);
+    super.initState();
+  }
+
+  void initReviewStreams(String productID) {
+    context
+        .read<ReviewRepository>()
+        .combineStreams(widget.productID)
+        .listen((event) {
+      setState(() {
+        _reviews = event;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +69,7 @@ class Buy2Page extends StatelessWidget {
           BlocProvider(
             create: (context) => ProductBloc(
                 productRepository: context.read<ProductRepository>())
-              ..add(GetProductByIDEvent(id: productID)),
+              ..add(GetProductByIDEvent(id: widget.productID)),
           ),
           BlocProvider(
               create: (context) => CartBloc(
@@ -81,7 +107,10 @@ class Buy2Page extends StatelessWidget {
                             images: _images,
                             variations: variations,
                           ),
-                          SalesInfo(products: products),
+                          SalesInfo(
+                            products: products,
+                            reviews: _reviews,
+                          ),
                           Container(
                             width: double.infinity,
                             color: Colors.white,
@@ -110,28 +139,77 @@ class Buy2Page extends StatelessWidget {
                             color: Colors.white,
                             margin: const EdgeInsets.symmetric(vertical: 10.0),
                             padding: const EdgeInsets.all(10.0),
-                            child: const Column(
+                            child: Column(
                               children: [
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
+                                    const Text(
                                       "Reviews",
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
                                     Text(
-                                      "0",
+                                      "${_reviews.length.toString()}",
                                     ),
                                   ],
                                 ),
-                                SizedBox(
-                                  height: 100,
-                                  child: Center(
-                                    child: Text("No Review yet"),
+                                if (_reviews.isEmpty)
+                                  const SizedBox(
+                                    height: 100,
+                                    child: Center(
+                                      child: Text("No Review yet"),
+                                    ),
                                   ),
-                                )
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: _reviews.length,
+                                  itemBuilder: (context, index) {
+                                    final review = _reviews[index].reviews;
+                                    final customer = _reviews[index].customer;
+                                    return ListTile(
+                                      leading: customer?.profile != null ||
+                                              customer!.profile.isNotEmpty
+                                          ? CircleAvatar(
+                                              backgroundImage: NetworkImage(
+                                                customer!.profile,
+                                              ),
+                                            )
+                                          : const CircleAvatar(
+                                              child: Text('No Image'),
+                                            ),
+                                      title: Text(customer?.name ?? 'No name'),
+                                      subtitle: Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            RatingBarIndicator(
+                                              rating: review.rating.toDouble(),
+                                              itemCount: 5,
+                                              itemSize: 10.0,
+                                              physics:
+                                                  const BouncingScrollPhysics(),
+                                              itemBuilder: (context, _) =>
+                                                  const Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                              ),
+                                            ),
+                                            Text(
+                                              review.message,
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ],
                             ),
                           ),
@@ -651,7 +729,13 @@ class HorizontalList extends StatelessWidget {
 
 class SalesInfo extends StatelessWidget {
   final Products products;
-  const SalesInfo({super.key, required this.products});
+  final List<ReviewWithCustomer> reviews;
+  const SalesInfo({super.key, required this.products, required this.reviews});
+  num sumRatings(List<ReviewWithCustomer> reviewWithCustomers) {
+    return reviews.fold(0, (num sum, ReviewWithCustomer reviewWithCustomer) {
+      return sum + reviewWithCustomer.reviews.rating;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -677,7 +761,7 @@ class SalesInfo extends StatelessWidget {
               Row(
                 children: [
                   RatingBarIndicator(
-                    rating: 2.5,
+                    rating: sumRatings(reviews).toDouble(),
                     itemCount: 5,
                     itemSize: 20.0,
                     physics: const BouncingScrollPhysics(),
@@ -690,7 +774,7 @@ class SalesInfo extends StatelessWidget {
                     width: 10,
                   ),
                   Text(
-                    "2.5",
+                    '${sumRatings(reviews).toDouble()}',
                     style: MyTextStyles.textBold,
                   ),
                   const SizedBox(

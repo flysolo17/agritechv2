@@ -48,8 +48,7 @@ class Products {
       variations: List<Variation>.from(
           json['variations'].map((v) => Variation.fromJson(v))),
       expiryDate: (json['expiryDate'] as Timestamp).toDate(),
-      reviews:
-          List<Reviews>.from(json['reviews'].map((v) => Reviews.fromJson(v))),
+      reviews: [],
       shippingInformation: ShippingInfo.fromJson(json['shippingInformation']),
       featured: json['featured'],
       createdAt: (json['createdAt'] as Timestamp).toDate(),

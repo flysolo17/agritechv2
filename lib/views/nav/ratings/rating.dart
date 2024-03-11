@@ -1,14 +1,160 @@
+import 'package:agritechv2/models/product/Reviews.dart';
 import 'package:agritechv2/models/transaction/OrderItems.dart';
 import 'package:agritechv2/models/transaction/Transactions.dart';
-import 'package:flutter/foundation.dart';
+import 'package:agritechv2/repository/auth_repository.dart';
+import 'package:agritechv2/repository/review_repository.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 import '../../../styles/color_styles.dart';
+import '../../../utils/Constants.dart';
 
-class RatingPage extends StatelessWidget {
+class RatingPage extends StatefulWidget {
   final Transactions transactions;
+
   const RatingPage({super.key, required this.transactions});
+
+  @override
+  State<RatingPage> createState() => _RatingPageState();
+}
+
+class _RatingPageState extends State<RatingPage> {
+  List<Reviews> _reviews = [];
+
+  @override
+  void initState() {
+    initReviews(widget.transactions.id);
+    super.initState();
+  }
+
+  void initReviews(String transactionID) {
+    context
+        .read<ReviewRepository>()
+        .getAllReviewByTransaction(transactionID)
+        .listen((event) {
+      setState(() {
+        _reviews = event;
+      });
+    });
+  }
+
+  void showRatingModal(BuildContext context, OrderItems orderItems) {
+    final _formKey = GlobalKey<FormState>();
+    double _rating = 0.0;
+    String _review = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Add Review',
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 20.0),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Review',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your review';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      _review = value;
+                    },
+                  ),
+                  SizedBox(height: 20.0),
+                  Text(
+                    'Rating:',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10.0),
+                  RatingBar.builder(
+                    initialRating: _rating,
+                    minRating: 0,
+                    direction: Axis.horizontal,
+                    allowHalfRating: true,
+                    itemCount: 5,
+                    itemSize: 40.0,
+                    itemBuilder: (context, _) => Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    onRatingUpdate: (rating) {
+                      _rating = rating;
+                    },
+                  ),
+                  SizedBox(height: 20.0),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(10.0),
+                    color: ColorStyle.brandRed,
+                    child: TextButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          Reviews reviews = Reviews(
+                              id: '',
+                              transactionID: widget.transactions.id,
+                              productID: orderItems.productID,
+                              rating: _rating,
+                              message: _review,
+                              customerID: context
+                                      .read<AuthRepository>()
+                                      .currentUser
+                                      ?.uid ??
+                                  '',
+                              comments: List.empty(),
+                              createdAt: DateTime.now());
+                          context
+                              .read<ReviewRepository>()
+                              .createReview(reviews)
+                              .then((value) => {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text('Rating success')))
+                                  })
+                              .catchError((err) => {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(err.toString())))
+                                  });
+                        }
+                      },
+                      child: Text('Submit'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +167,21 @@ class RatingPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Text(transactions.id),
+            Text(widget.transactions.id),
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: transactions.orderList.length,
+              itemCount: widget.transactions.orderList.length,
               itemBuilder: (context, index) {
                 return ProductRatingCard(
-                    orderItems: transactions.orderList[index]);
+                  orderItems: widget.transactions.orderList[index],
+                  reviews: _reviews
+                      .where((review) =>
+                          review.productID ==
+                          widget.transactions.orderList[index].productID)
+                      .toList(),
+                  onTap: (items, message) => {showRatingModal(context, items)},
+                );
               },
             ),
           ],
@@ -38,24 +191,16 @@ class RatingPage extends StatelessWidget {
   }
 }
 
-class ProductRatingCard extends StatefulWidget {
+class ProductRatingCard extends StatelessWidget {
   final OrderItems orderItems;
-
-  const ProductRatingCard({Key? key, required this.orderItems})
+  final List<Reviews> reviews;
+  Function(OrderItems items, String message) onTap;
+  ProductRatingCard(
+      {Key? key,
+      required this.orderItems,
+      required this.reviews,
+      required this.onTap})
       : super(key: key);
-
-  @override
-  State<ProductRatingCard> createState() => _ProductRatingCardState();
-}
-
-class _ProductRatingCardState extends State<ProductRatingCard> {
-  final TextEditingController _commentController = TextEditingController();
-  double _rating = 0;
-
-  void _submitRating() {
-    print('Rating: $_rating');
-    print('Comment: ${_commentController.text}');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,66 +209,105 @@ class _ProductRatingCardState extends State<ProductRatingCard> {
       color: Colors.white,
       padding: const EdgeInsets.all(10.0),
       margin: const EdgeInsets.symmetric(vertical: 5.0),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Image.network(
-            widget.orderItems.imageUrl,
-            height: 100,
-            width: 100,
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.orderItems.productName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  RatingBar.builder(
-                    initialRating: _rating,
-                    minRating: 1,
-                    direction: Axis.horizontal,
-                    allowHalfRating: true,
-                    itemCount: 5,
-                    itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    itemBuilder: (context, _) => const Icon(
-                      Icons.star,
-                      color: Colors.amber,
-                    ),
-                    onRatingUpdate: (rating) {
-                      setState(() {
-                        _rating = rating;
-                      });
-                    },
-                  ),
-                  TextField(
-                    controller: _commentController,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: 'Add a comment',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: _submitRating,
-                    child: const Text("Submit"),
-                  ),
-                ],
-              ),
+          ListTile(
+            leading: Image.network(
+              orderItems.imageUrl,
+              fit: BoxFit.cover,
+              width: 100,
+            ),
+            title: Text(orderItems.productName),
+            subtitle: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  formatPrice(orderItems.price * orderItems.quantity),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "x${orderItems.quantity}",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
+          const SizedBox(height: 8),
+          const Divider(),
+          ListTile(
+            title:
+                Text(reviews.isEmpty ? "No review yet!" : reviews[0].message),
+            subtitle: RatingBarIndicator(
+              rating: reviews.isEmpty ? 0.0 : reviews[0].rating.toDouble(),
+              itemCount: 5,
+              itemSize: 20.0,
+              physics: const BouncingScrollPhysics(),
+              itemBuilder: (context, _) => const Icon(
+                Icons.star,
+                color: Colors.amber,
+              ),
+            ),
+            trailing: IconButton.filledTonal(
+                onPressed: () {
+                  final current = reviews.isEmpty ? "" : reviews[0].message;
+                  onTap(orderItems, current);
+                },
+                icon: Icon(reviews.isEmpty ? Icons.add : Icons.edit)),
+          )
         ],
       ),
     );
   }
 }
+
+// Expanded(
+  //           child: Padding(
+  //             padding: const EdgeInsets.all(8.0),
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 Text(
+  //                   widget.orderItems.productName,
+  //                   style: const TextStyle(
+  //                     fontSize: 18,
+  //                     fontWeight: FontWeight.w500,
+  //                     color: Colors.black,
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 8),
+  //                 RatingBar.builder(
+  //                   initialRating: _rating,
+  //                   minRating: 1,
+  //                   direction: Axis.horizontal,
+  //                   allowHalfRating: true,
+  //                   itemCount: 5,
+  //                   itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+  //                   itemBuilder: (context, _) => const Icon(
+  //                     Icons.star,
+  //                     color: Colors.amber,
+  //                   ),
+  //                   onRatingUpdate: (rating) {
+  //                     setState(() {
+  //                       _rating = rating;
+  //                     });
+  //                   },
+  //                 ),
+  //                 TextField(
+  //                   controller: _commentController,
+  //                   maxLines: 2,
+  //                   decoration: const InputDecoration(
+  //                     labelText: 'Add a comment',
+  //                     border: OutlineInputBorder(),
+  //                   ),
+  //                 ),
+  //                 ElevatedButton(
+  //                   onPressed: _submitRating,
+  //                   child: const Text("Submit"),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),

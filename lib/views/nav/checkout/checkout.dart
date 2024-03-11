@@ -165,7 +165,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
                               changeQuantity: (index, value) {
                                 widget.orderItems[index].quantity = value;
                                 changeDetails();
-                              },
+                              }, 
                               onMessageChange: (value) {
                                 setState(() {
                                   _message = value;
