@@ -1,3 +1,5 @@
+import 'package:agritechv2/blocs/cart/cart_bloc.dart';
+import 'package:agritechv2/blocs/product/product_bloc.dart';
 import 'package:agritechv2/repository/audit_repository.dart';
 import 'package:agritechv2/repository/auth_repository.dart';
 import 'package:agritechv2/repository/cart_repository.dart';
@@ -76,6 +78,16 @@ class MyApp extends StatelessWidget {
             create: (context) => MessengerBloc(
                 messagesRepository: context.read<MessagesRepository>(),
                 myID: context.read<AuthRepository>().currentUser?.uid ?? ''),
+          ),
+          BlocProvider(
+            create: (context) => CartBloc(
+                cartRepository: context.read<CartRepository>(),
+                uid: context.read<AuthRepository>().currentUser?.uid ?? ''),
+          ),
+          BlocProvider(
+            create: (context) => ProductBloc(
+              productRepository: context.read<ProductRepository>(),
+            ),
           ),
         ],
         child: MaterialApp.router(

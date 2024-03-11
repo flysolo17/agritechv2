@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:agritechv2/blocs/auth/auth_bloc.dart';
 import 'package:agritechv2/models/product/Cart.dart';
 import 'package:agritechv2/models/product/Shipping.dart';
 import 'package:agritechv2/models/transaction/OrderItems.dart';
@@ -45,8 +46,9 @@ class Buy2Page extends StatelessWidget {
               ..add(GetProductByIDEvent(id: productID)),
           ),
           BlocProvider(
-              create: (context) =>
-                  CartBloc(cartRepository: context.read<CartRepository>())),
+              create: (context) => CartBloc(
+                  cartRepository: context.read<CartRepository>(),
+                  uid: context.read<AuthRepository>().currentUser?.uid ?? '')),
           BlocProvider(
               create: (context) => FavoritesBloc(
                   favoritesRepository: context.read<FavoritesRepository>(),
@@ -164,8 +166,9 @@ class ButtonActions extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return BlocProvider(
-          create: (context) =>
-              CartBloc(cartRepository: context.read<CartRepository>()),
+          create: (context) => CartBloc(
+              cartRepository: context.read<CartRepository>(),
+              uid: context.read<AuthRepository>().currentUser?.uid ?? ''),
           child: Container(
             color: Colors.grey[100],
             padding: const EdgeInsets.all(10.0),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:agritechv2/models/product/CartWithProduct.dart';
 import 'package:agritechv2/repository/cart_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -11,7 +12,8 @@ part 'cart_state.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
   final CartRepository _cartRepository;
-  CartBloc({required CartRepository cartRepository})
+
+  CartBloc({required CartRepository cartRepository, required String uid})
       : _cartRepository = cartRepository,
         super(CartInitial()) {
     on<CartEvent>((event, emit) {
@@ -19,6 +21,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     });
     on<AddToCartEvent>(_addToCart);
     on<UpdateCartQuantity>(_onUpdateCartQuantity);
+    on<DeleteCart>(_onDeleteCart);
   }
 
   Future<void> _addToCart(AddToCartEvent event, Emitter<CartState> emit) async {
@@ -42,6 +45,18 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       await _cartRepository.updateCartQuantity(event.cartID, event.quantity);
       print("cart updated");
       emit(const CartSuccessState<String>("Successfully Updated"));
+    } catch (error) {
+      print(error);
+      emit(CartErrorState(error.toString()));
+    }
+  }
+
+  Future<void> _onDeleteCart(DeleteCart event, Emitter<CartState> emit) async {
+    emit(CartLoadingState());
+    try {
+      await _cartRepository.deleteCart(event.cartID);
+      print("cart updated");
+      emit(const CartSuccessState<String>("Successfully Deleted"));
     } catch (error) {
       print(error);
       emit(CartErrorState(error.toString()));

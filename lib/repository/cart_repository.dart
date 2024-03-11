@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:agritechv2/models/product/CartWithProduct.dart';
+import 'package:agritechv2/models/product/Products.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/product/Cart.dart';
@@ -49,7 +51,42 @@ class CartRepository {
         controller.add(cartList);
       });
     });
+
     return controller.stream;
+  }
+
+  Stream<List<CartWithProduct>> getAllCartWithProductbyUID(String uid) {
+    List<CartWithProduct> cartWithProductList = [];
+    var streamController = StreamController<List<CartWithProduct>>();
+
+    _firebaseFirestore
+        .collection(COLLECTION_NAME)
+        .where('userID', isEqualTo: uid)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .listen((QuerySnapshot<Map<String, dynamic>> snapshot) async {
+      cartWithProductList = [];
+      for (var doc in snapshot.docs) {
+        print(snapshot.docs.length);
+
+        final cart = Cart.fromJson(doc.data());
+
+        final productID = cart.productID;
+        var productSnapshot = await _firebaseFirestore
+            .collection('products')
+            .doc(productID)
+            .get();
+        if (productSnapshot.exists) {
+          final product =
+              Products.fromJson(productSnapshot.data() as Map<String, dynamic>);
+          cartWithProductList
+              .add(CartWithProduct(cart: cart, products: product));
+        }
+        streamController.add(cartWithProductList);
+      }
+    });
+
+    return streamController.stream;
   }
 
   Future<Cart?> getCartItem(
@@ -90,5 +127,9 @@ class CartRepository {
         .collection(COLLECTION_NAME)
         .doc(cartID)
         .update({"quantity": quantity});
+  }
+
+  Future<void> deleteCart(String cartID) {
+    return _firebaseFirestore.collection(COLLECTION_NAME).doc(cartID).delete();
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:agritechv2/repository/product_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -14,6 +16,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         super(ProductInitial()) {
     on<ProductEvent>((event, emit) {});
     on<GetProductByIDEvent>(_getProductByID);
+    on<SearchProductEvent>(_searchProduct);
   }
 
   void _getProductByID(
@@ -22,6 +25,17 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       emit(ProductLoading());
       Products data = await _productRepository.getProductById(event.id);
       emit(ProductLoaded<Products>(data));
+    } catch (e) {
+      emit(ProductError(e.toString()));
+    }
+  }
+
+  Future<void> _searchProduct(
+      SearchProductEvent event, Emitter<ProductState> emit) async {
+    try {
+      emit(ProductLoading());
+      List<Products> data = await _productRepository.searchProduct(event.name);
+      emit(ProductLoaded<List<Products>>(data));
     } catch (e) {
       emit(ProductError(e.toString()));
     }

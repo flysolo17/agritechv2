@@ -161,9 +161,15 @@ class _CheckOutPageState extends State<CheckOutPage> {
                               orderList: widget.orderItems,
                               transactionType: _transactionType,
                               schedule: _schedule,
+                              message: _message,
                               changeQuantity: (index, value) {
                                 widget.orderItems[index].quantity = value;
                                 changeDetails();
+                              },
+                              onMessageChange: (value) {
+                                setState(() {
+                                  _message = value;
+                                });
                               },
                               total: _total,
                               shipping: _shipping,
@@ -245,7 +251,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
                               amount: _total + _shipping,
                               type: _paymentType,
                               status: PaymentStatus.UNPAID),
-                          message: "",
+                          message: _message,
                           address: _transactionType == TransactionType.DELIVERY
                               ? defaultAddress
                               : null,
@@ -266,14 +272,16 @@ class _CheckOutPageState extends State<CheckOutPage> {
   }
 }
 
-class OrderDetails extends StatelessWidget {
+class OrderDetails extends StatefulWidget {
   List<OrderItems> orderList;
   TransactionType transactionType;
   TransactionSchedule schedule;
   num total = 0;
   num shipping = 0;
+  String message;
   num totalWeight = 0;
   Function(int index, int value) changeQuantity;
+  Function(String message) onMessageChange;
   OrderDetails(
       {super.key,
       required this.orderList,
@@ -281,8 +289,29 @@ class OrderDetails extends StatelessWidget {
       required this.schedule,
       required this.total,
       required this.shipping,
+      required this.message,
       required this.totalWeight,
-      required this.changeQuantity});
+      required this.changeQuantity,
+      required this.onMessageChange});
+
+  @override
+  State<OrderDetails> createState() => _OrderDetailsState();
+}
+
+class _OrderDetailsState extends State<OrderDetails> {
+  TextEditingController _messageController = TextEditingController();
+
+  @override
+  void initState() {
+    _messageController.text = widget.message;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -316,15 +345,15 @@ class OrderDetails extends StatelessWidget {
           ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: orderList.length,
+              itemCount: widget.orderList.length,
               itemBuilder: (context, index) {
-                OrderItems orderItems = orderList[index];
+                OrderItems orderItems = widget.orderList[index];
                 return OrderItemContainer(
                   orderItems: orderItems,
                   changeQuantity: (value) {
-                    changeQuantity(index, value);
+                    widget.changeQuantity(index, value);
                   },
-                  type: transactionType,
+                  type: widget.transactionType,
                 );
               }),
           Padding(
@@ -334,34 +363,49 @@ class OrderDetails extends StatelessWidget {
             child: Column(
               children: [
                 const Divider(),
-                OrderDetailsData(title: "Total items", value: "$totalWeight"),
                 OrderDetailsData(
-                    title: "Shipping Fee", value: formatPrice(shipping)),
+                    title: "Total items", value: "${widget.totalWeight}"),
                 OrderDetailsData(
-                    title: transactionType == TransactionType.DELIVERY
+                    title: "Shipping Fee", value: formatPrice(widget.shipping)),
+                OrderDetailsData(
+                    title: widget.transactionType == TransactionType.DELIVERY
                         ? "Estimated Delivery Time"
                         : "Estimated Pick up Time",
-                    value: schedule.getFormatedSchedule()),
-                OrderDetailsData(title: "Sub Total", value: formatPrice(total))
+                    value: widget.schedule.getFormatedSchedule()),
+                OrderDetailsData(
+                    title: "Sub Total", value: formatPrice(widget.total))
               ],
             ),
           ),
           const Divider(),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 "Message",
                 style: TextStyle(
-                    fontWeight: FontWeight.w500, color: Colors.grey[400]),
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[400],
+                ),
               ),
-              TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    "Please leave a message",
-                    style: TextStyle(fontWeight: FontWeight.w300),
-                  ))
+              Expanded(
+                child: TextField(
+                  onSubmitted: (value) {
+                    widget.onMessageChange(value);
+                  },
+                  controller: _messageController,
+                  textAlign: TextAlign.end,
+                  decoration: const InputDecoration(
+                    hintText: 'Please leave a message',
+                    hintTextDirection: TextDirection.ltr,
+                    hintStyle: TextStyle(
+                      fontWeight: FontWeight.w100,
+                      color: Colors.red,
+                    ),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
             ],
           )
         ],

@@ -41,14 +41,14 @@ class CartItemListPage extends StatelessWidget {
                         separatorBuilder: (BuildContext context, int index) =>
                             const Divider(),
                         itemBuilder: (context, index) {
-                          return BlocProvider(
-                            create: (context) => CartBloc(
-                                cartRepository: context.read<CartRepository>()),
-                            child: CartContainer(
-                                cartItem: cartItems[index],
-                                onSelect: (shipping, value) {
-                                  if (value) {}
-                                }),
+                          return BlocBuilder<CartBloc, CartState>(
+                            builder: (context, state) {
+                              return CartContainer(
+                                  cartItem: cartItems[index],
+                                  onSelect: (shipping, value) {
+                                    if (value) {}
+                                  });
+                            },
                           );
                         },
                         itemCount: cartItems.length,

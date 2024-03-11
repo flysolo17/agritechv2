@@ -20,3 +20,11 @@ class UpdateCartQuantity extends CartEvent {
   @override
   List<Object> get props => [cartID, quantity];
 }
+
+class DeleteCart extends CartEvent {
+  final String cartID;
+
+  const DeleteCart(this.cartID);
+  @override
+  List<Object> get props => [cartID];
+}

@@ -6,7 +6,6 @@ class OrderItems {
   bool isVariation;
   String variationID;
   int quantity;
-
   num cost;
   num price;
   String imageUrl;

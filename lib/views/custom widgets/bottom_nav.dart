@@ -1,6 +1,9 @@
+import 'package:agritechv2/blocs/cart/cart_bloc.dart';
 import 'package:agritechv2/blocs/messenger/messenger_bloc.dart';
 import 'package:agritechv2/models/messages.dart';
+import 'package:agritechv2/models/product/CartWithProduct.dart';
 import 'package:agritechv2/repository/auth_repository.dart';
+import 'package:agritechv2/repository/cart_repository.dart';
 import 'package:agritechv2/repository/message_repository.dart';
 import 'package:agritechv2/views/custom%20widgets/cart_action.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +48,7 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   @override
   Widget build(BuildContext context) {
-    String myID = context.read<AuthRepository>().currentUser?.uid ?? '';
+    String uid = context.read<AuthRepository>().currentUser?.uid ?? '';
     return Scaffold(
       appBar: AppBar(
         backgroundColor: ColorStyle.brandRed,
@@ -57,7 +60,7 @@ class _MainNavigationState extends State<MainNavigation> {
                 if (snapshot.hasData) {
                   List<Messenger> messages = snapshot.data ?? [];
                   _unseenList = messages
-                      .where((e) => e.receiverID == myID && e.seen == false)
+                      .where((e) => e.receiverID == uid && e.seen == false)
                       .toList();
                 }
                 return badges.Badge(
@@ -80,6 +83,9 @@ class _MainNavigationState extends State<MainNavigation> {
                   ), // You can replace this with your actual badge content
                 );
               }),
+          const SizedBox(
+            width: 5.0,
+          ),
           const CartAction()
         ],
       ),

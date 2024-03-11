@@ -13,11 +13,12 @@ import 'package:agritechv2/views/auth/change_password.dart';
 import 'package:agritechv2/views/auth/forgot_password.dart';
 import 'package:agritechv2/views/calcu/calculator.dart';
 import 'package:agritechv2/views/custom%20widgets/bottom_nav.dart';
+import 'package:agritechv2/views/nav/cart/cart.dart';
 
 import 'package:agritechv2/views/nav/checkout/gcash_payment.dart';
 
 import 'package:agritechv2/views/nav/buy/buy_2.dart';
-import 'package:agritechv2/views/nav/cart/cart.dart';
+import 'package:agritechv2/views/nav/cart/old_cart.dart';
 
 import 'package:agritechv2/views/nav/checkout/checkout.dart';
 import 'package:agritechv2/views/nav/favorites/favorites.dart';

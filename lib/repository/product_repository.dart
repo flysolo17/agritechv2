@@ -7,6 +7,7 @@ import '../models/product/Products.dart';
 class ProductRepository {
   final FirebaseFirestore _firebaseFirestore;
   final String COLLECTION_NAME = 'products';
+  List<Products> PRODUCTS = [];
   ProductRepository({
     FirebaseFirestore? firebaseFirestore,
   }) : _firebaseFirestore = firebaseFirestore ?? FirebaseFirestore.instance;
@@ -63,6 +64,7 @@ class ProductRepository {
             snapshot.docs.map((DocumentSnapshot<Map<String, dynamic>> doc) {
           return Products.fromJson(doc.data() ?? {});
         }).toList();
+        PRODUCTS = productsList;
         controller.add(productsList);
       });
     });
@@ -87,5 +89,20 @@ class ProductRepository {
       });
     });
     return controller.stream;
+  }
+
+  Future<List<Products>> searchProduct(String name) async {
+    QuerySnapshot querySnapshot = await _firebaseFirestore
+        .collection(COLLECTION_NAME)
+        .where("name", isEqualTo: name)
+        .get();
+
+    List<Products> productList = [];
+    querySnapshot.docs.forEach((doc) {
+      Products product = Products.fromJson(doc.data() as Map<String, dynamic>);
+      productList.add(product);
+    });
+
+    return productList;
   }
 }

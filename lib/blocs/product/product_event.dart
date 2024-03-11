@@ -18,3 +18,10 @@ class GetProductByIDEvent extends ProductEvent {
   @override
   List<Object> get props => [id];
 }
+
+class SearchProductEvent extends ProductEvent {
+  final name;
+  const SearchProductEvent({required this.name});
+  @override
+  List<Object> get props => [name];
+}

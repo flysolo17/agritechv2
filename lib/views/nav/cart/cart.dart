@@ -1,9 +1,6 @@
 import 'dart:convert';
 
-import 'package:agritechv2/models/product/Products.dart';
-import 'package:agritechv2/models/transaction/OrderItems.dart';
-import 'package:agritechv2/repository/product_repository.dart';
-import 'package:agritechv2/views/custom%20widgets/button.dart';
+import 'package:agritechv2/styles/color_styles.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,38 +8,44 @@ import 'package:go_router/go_router.dart';
 import 'package:input_quantity/input_quantity.dart';
 
 import '../../../blocs/cart/cart_bloc.dart';
-import '../../../models/product/Cart.dart';
-
-import '../../../models/product/Shipping.dart';
+import '../../../models/product/CartWithProduct.dart';
 import '../../../models/product/Variations.dart';
+import '../../../models/transaction/OrderItems.dart';
 import '../../../repository/auth_repository.dart';
 import '../../../repository/cart_repository.dart';
-
-import '../../../styles/color_styles.dart';
 import '../../../utils/Constants.dart';
 
 class CartPage extends StatefulWidget {
-  const CartPage({super.key});
+  const CartPage({Key? key}) : super(key: key);
 
   @override
   State<CartPage> createState() => _CartPageState();
 }
 
 class _CartPageState extends State<CartPage> {
-  List<OrderItems> _orderItems = [];
+  List<Map<String, OrderItems>> orders = [];
 
-  void addItem(OrderItems newItem, bool isChecked) {
-    setState(() {
-      if (isChecked) {
-        _orderItems.add(newItem);
-      } else {
-        removeItem(newItem.productID);
+  // List<OrderItems> orders = [];
+  List<bool> selected = [];
+  List<CartWithProduct> cartWithProduct = [];
+  // void updateSelected(List<bool> selected) {
+  //   orders.clear(); // Clear existing orders before adding new ones
+  //   selected.asMap().forEach((index, isChecked) {
+  //     if (isChecked) {
+  //       orders.add(createOrderItems(cartWithProduct[index]));
+  //     }
+  //   });
+  //   print("Orders : ${orders.length}");
+  // }
+
+  num computeTotalPrice(List<Map<String, OrderItems>> orders) {
+    double totalPrice = 0;
+    for (final orderMap in orders) {
+      for (final orderItem in orderMap.values) {
+        totalPrice += orderItem.price * orderItem.quantity;
       }
-    });
-  }
-
-  void removeItem(String productID) {
-    _orderItems.removeWhere((item) => item.productID == productID);
+    }
+    return totalPrice;
   }
 
   @override
@@ -52,40 +55,54 @@ class _CartPageState extends State<CartPage> {
         backgroundColor: ColorStyle.brandRed,
         title: const Text("My Cart"),
       ),
-      body: StreamBuilder<List<Cart>>(
-        stream: context
-            .read<CartRepository>()
-            .getCartByUID(context.read<AuthRepository>().currentUser!.uid),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(snapshot.error.toString()),
-            );
-          }
-          if (snapshot.data != null) {
-            var cartList = snapshot.data ?? [];
+      body: StreamBuilder<List<CartWithProduct>>(
+          stream: context.read<CartRepository>().getAllCartWithProductbyUID(
+              context.read<AuthRepository>().currentUser?.uid ?? ''),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return shimmerLoading1();
+            }
+            if (snapshot.hasError) {
+              return const Icon(Icons.error);
+            }
+            if (snapshot.data != null) {
+              var cartList = snapshot.data ?? [];
 
-            return BlocProvider(
-              create: (context) =>
-                  CartBloc(cartRepository: context.read<CartRepository>()),
-              child: Column(
+              return Column(
                 children: [
                   Expanded(
                     child: ListView.builder(
                       itemCount: cartList.length,
                       itemBuilder: (context, index) {
-                        return CartContainer(
-                          cartItem: cartList[index],
-                          onSelect: (OrderItems orderItems, bool isChecked) {
-                            addItem(orderItems, isChecked);
-                            print(_orderItems.length);
+                        final cart = cartList[index];
+                        return Dismissible(
+                          key: Key(cart.cart.id),
+                          onDismissed: (direction) {
+                            context
+                                .read<CartBloc>()
+                                .add(DeleteCart(cart.cart.id));
                           },
+                          child: CartCard(
+                            cartWithProduct: cart,
+                            selected: orders.any((orderMap) =>
+                                orderMap.containsKey(cart.cart.id)),
+                            onCartClicked: (bool isChecked) {
+                              setState(() {
+                                if (isChecked) {
+                                  orders.add(
+                                      {cart.cart.id: createOrderItems(cart)});
+                                } else {
+                                  orders.removeWhere((element) =>
+                                      element.containsKey(cart.cart.id));
+                                }
+                              });
+                            },
+                          ),
                         );
                       },
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.all(10.0),
                     color: Colors.white,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -94,185 +111,173 @@ class _CartPageState extends State<CartPage> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10.0),
                           child: Text(
-                            formatPrice(computeTotalOrder(_orderItems)),
+                            formatPrice(computeTotalPrice(orders)),
                             style: const TextStyle(
-                                color: ColorStyle.brandRed,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18),
+                              color: ColorStyle.brandRed,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (_orderItems.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                        Container(
+                          color: ColorStyle.brandRed,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: TextButton(
+                            child: const Text(
+                              "Checkout",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            onPressed: () {
+                              if (orders.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text("No Product to Checkout")));
-                              return;
-                            }
-                            context.push('/checkout',
-                                extra: jsonEncode(_orderItems
-                                    .map((e) => e.toJson())
-                                    .toList()));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  10), // Set borderRadius to 0 for non-rounded edges
-                            ),
-                            backgroundColor: ColorStyle
-                                .brandRed, // Set the button color to red
+                                    content: Text("No Product to Checkout"),
+                                  ),
+                                );
+                                return;
+                              }
+                              List<OrderItems> selected = orders
+                                  .expand((orderMap) => orderMap.values)
+                                  .toList();
+                              context.push(
+                                '/checkout',
+                                extra: jsonEncode(
+                                    selected.map((e) => e.toJson()).toList()),
+                              );
+                            },
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Checkout (${countOrders(_orderItems)})",
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        )
+                        ),
                       ],
                     ),
                   ),
                 ],
-              ),
-            );
-          } else {
-            return const Center(
-              child: Text("No product yet!"),
-            );
-          }
-        },
-      ),
+              );
+            } else {
+              return const Center(
+                child: Text("No items in cart"),
+              );
+            }
+          }),
+    );
+  }
+
+  OrderItems createOrderItems(CartWithProduct cartWithProduct) {
+    return OrderItems(
+      productID: cartWithProduct.products.id,
+      productName: cartWithProduct.products.name,
+      isVariation: cartWithProduct.cart.isVariation,
+      variationID: cartWithProduct.cart.variationID ?? '',
+      quantity: cartWithProduct.cart.quantity,
+      cost: cartWithProduct.products.cost,
+      price: cartWithProduct.products.price,
+      imageUrl: cartWithProduct.products.images.isNotEmpty
+          ? cartWithProduct.products.images[0]
+          : '',
+      shippingInfo: cartWithProduct.products.shippingInformation,
     );
   }
 }
 
-class CartContainer extends StatefulWidget {
-  final Cart cartItem;
-  final Function(OrderItems orderItems, bool isChecked) onSelect;
+class CartCard extends StatelessWidget {
+  final CartWithProduct cartWithProduct;
+  final bool selected;
 
-  CartContainer({
-    super.key,
-    required this.cartItem,
-    required this.onSelect,
-  });
+  final Function(bool selected) onCartClicked;
 
-  @override
-  State<CartContainer> createState() => _CartContainerState();
-}
+  CartCard({
+    Key? key,
+    required this.cartWithProduct,
+    required this.selected,
+    required this.onCartClicked,
+  }) : super(key: key);
 
-class _CartContainerState extends State<CartContainer> {
-  bool isChecked = false;
+  Variation? getVariationById(
+      List<Variation> variationList, String? variationId) {
+    return variationId != null
+        ? variationList.firstWhereOrNull((v) => v.id == variationId)
+        : null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    Variation? getVariationById(
-        List<Variation> variationList, String? variationId) {
-      return variationId != null
-          ? variationList.firstWhereOrNull((v) => v.id == variationId)
-          : null;
-    }
+    final Variation? variation = getVariationById(
+        cartWithProduct.products.variations, cartWithProduct.cart.variationID);
 
-    return FutureBuilder<Products>(
-      future: context
-          .read<ProductRepository>()
-          .getProductById(widget.cartItem.productID),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return shimmerLoading1(); // Loading indicator
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else if (!snapshot.hasData) {
-          return const Text('Product not found');
-        } else {
-          final product = snapshot.data!;
-          final Variation? variation =
-              getVariationById(product.variations, widget.cartItem.variationID);
-
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Checkbox(
-                value: isChecked,
-                onChanged: (bool? value) {
-                  setState(() {
-                    isChecked = value!;
-                    widget.onSelect(
-                      OrderItems(
-                        productID: product.id,
-                        productName:
-                            variation != null ? variation.name : product.name,
-                        isVariation: widget.cartItem.isVariation,
-                        variationID: variation?.id ?? "",
-                        quantity: widget.cartItem.quantity,
-                        cost: variation != null ? variation.cost : product.cost,
-                        price:
-                            variation != null ? variation.price : product.price,
-                        imageUrl:
-                            variation != null && variation.image.isNotEmpty
-                                ? variation.image
-                                : product.images[0],
-                        shippingInfo: product.shippingInformation,
-                      ),
-                      isChecked,
-                    );
-                  });
-                },
-              ),
-              Container(
-                height: 100,
-                width: 100,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: variation != null && variation.image.isNotEmpty
-                        ? NetworkImage(variation.image)
-                        : NetworkImage(product.images[0]),
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      variation != null ? variation.name : product.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FontStyle.normal,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Text(
-                      variation != null
-                          ? formatPrice(
-                              variation.price * widget.cartItem.quantity)
-                          : formatPrice(
-                              product.price * widget.cartItem.quantity),
-                    ),
-                    InputQty(
-                      maxVal:
-                          variation != null ? variation.stocks : product.stocks,
-                      initVal: widget.cartItem.quantity,
-                      minVal: 1,
-                      steps: 1,
-                      onQtyChanged: (val) {
-                        context
-                            .read<CartBloc>()
-                            .add(UpdateCartQuantity(widget.cartItem.id, val));
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
+    return BlocConsumer<CartBloc, CartState>(
+      listener: (context, state) {
+        if (state is CartSuccessState<String>) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('${state.data}')));
         }
+        if (state is CartErrorState) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('${state.error}')));
+        }
+      },
+      builder: (context, state) {
+        return state is CartLoadingState
+            ? shimmerLoading1()
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Checkbox(
+                    value: selected,
+                    onChanged: (bool? value) {
+                      onCartClicked(value ?? false);
+                    },
+                  ),
+                  Expanded(
+                    child: ListTile(
+                      leading: Image.network(
+                        variation != null
+                            ? variation.image
+                            : cartWithProduct.products.images[0],
+                        height: double.infinity,
+                        width: 100,
+                        fit: BoxFit.cover,
+                      ),
+                      title: Text(
+                        variation != null
+                            ? variation.name
+                            : cartWithProduct.products.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.normal,
+                          color: Colors.black,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            variation != null
+                                ? formatPrice(variation.price *
+                                    cartWithProduct.cart.quantity)
+                                : formatPrice(cartWithProduct.products.price *
+                                    cartWithProduct.cart.quantity),
+                          ),
+                          InputQty(
+                            maxVal: variation != null
+                                ? variation.stocks
+                                : cartWithProduct.products.stocks,
+                            initVal: cartWithProduct.cart.quantity,
+                            minVal: 1,
+                            steps: 1,
+                            onQtyChanged: (val) {
+                              context.read<CartBloc>().add(UpdateCartQuantity(
+                                  cartWithProduct.cart.id, val));
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
       },
     );
   }

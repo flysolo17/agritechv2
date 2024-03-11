@@ -1,20 +1,19 @@
 import 'dart:io';
 
 import 'package:agritechv2/blocs/transactions/transactions_bloc.dart';
-import 'package:agritechv2/models/users/Customer.dart';
+
 import 'package:agritechv2/models/transaction/PaymentMethod.dart';
-import 'package:agritechv2/models/transaction/TransactionDetails.dart';
+
 import 'package:agritechv2/repository/transaction_repository.dart';
 import 'package:agritechv2/utils/Constants.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:external_app_launcher/external_app_launcher.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_media_downloader/flutter_media_downloader.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../styles/color_styles.dart';
 
