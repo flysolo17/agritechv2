@@ -60,23 +60,25 @@ class _CheckOutPageState extends State<CheckOutPage> {
   num _shipping = 0;
   num _totalItems = 0;
   String _message = "";
-  void changeDetails() {
-    setState(() {
-      _total = computeTotalOrder(widget.orderItems);
-      _totalItems = countOrders(widget.orderItems);
-      _transactionType == TransactionType.DELIVERY
-          ? computeShipping(widget.orderItems)
-          : 0;
-
-      _shipping = computeShipping(widget.orderItems);
-      print(areAllItemsAboveMinimum(widget.orderItems));
-    });
-  }
 
   @override
   void initState() {
     super.initState();
     changeDetails();
+  }
+
+  void changeDetails() {
+    setState(() {
+      _total = computeTotalOrder(widget.orderItems);
+      _totalItems = countOrders(widget.orderItems);
+      _shipping = _transactionType == TransactionType.DELIVERY
+          ? computeShipping(widget.orderItems)
+          : 0;
+      print("SHIPPING FEE : $_shipping");
+      print("ORDER ITEMS : ${widget.orderItems.length}");
+      print("ORDER TYPE : ${_transactionType.name}");
+      // _shipping = computeShipping(widget.orderItems);
+    });
   }
 
   @override
@@ -165,7 +167,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
                               changeQuantity: (index, value) {
                                 widget.orderItems[index].quantity = value;
                                 changeDetails();
-                              }, 
+                              },
                               onMessageChange: (value) {
                                 setState(() {
                                   _message = value;

@@ -15,8 +15,111 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../styles/color_styles.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  Customer? _customer;
+
+  @override
+  void initState() {
+    super.initState();
+    context
+        .read<UserRepository>()
+        .getCustomer(
+          context.read<AuthRepository>().currentUser?.uid ?? "",
+        )
+        .listen((customer) {
+      if (mounted) {
+        setState(() {
+          _customer = customer;
+        });
+      }
+    });
+  }
+
+  void showEditProfileDialog(BuildContext context, String uid, String name) {
+    final _formKey = GlobalKey<FormState>();
+    String current = name;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  const Text(
+                    'Edit Profile',
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20.0),
+                  TextFormField(
+                    initialValue: name,
+                    decoration: const InputDecoration(
+                      labelText: 'Enter fullname',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 1,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your fullname';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      current = value;
+                    },
+                  ),
+                  const SizedBox(
+                    height: 10.0,
+                  ),
+                  Button(
+                    onTap: () {
+                      context
+                          .read<UserRepository>()
+                          .editProfile(uid, current)
+                          .then((value) => {
+                                context.pop(),
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text("Successfully updated!")))
+                              })
+                          .catchError((err) => {
+                                context.pop(),
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(err.toString())))
+                              });
+                    },
+                    buttonWidth: double.infinity,
+                    buttonText: "Save",
+                    buttonColor: ColorStyle.brandRed,
+                    borderColor: ColorStyle.blackColor,
+                    textColor: Colors.white,
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,42 +129,38 @@ class ProfilePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       verticalDirection: VerticalDirection.down,
       children: [
-        StreamBuilder<Customer>(
-            stream: context.read<UserRepository>().getCustomer(
-                context.read<AuthRepository>().currentUser?.uid ?? ""),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator(); // Loading indicator
-              } else if (snapshot.hasError) {
-                return Text('Error: //${snapshot.error}');
-              } else if (!snapshot.hasData) {
-                return const Text('No data available.');
-              } else {
-                final customer = snapshot.data!;
-                return BlocProvider(
-                  create: (context) => CustomerBloc(
-                      userRepository: context.read<UserRepository>()),
-                  child: Column(
-                    children: [
-                      UserProfile(
-                        customer: customer,
-                      ),
-                      Text(
-                        customer.name,
-                        style: MyTextStyles.header,
-                      ),
-                      Text(
-                        customer.email,
-                        style: MyTextStyles.headerlight,
-                      ),
-                    ],
-                  ),
-                );
-              }
-            }),
+        BlocProvider(
+          create: (context) =>
+              CustomerBloc(userRepository: context.read<UserRepository>()),
+          child: Column(
+            children: [
+              UserProfile(
+                customer: _customer!,
+              ),
+              Text(
+                _customer?.name ?? "",
+                style: MyTextStyles.header,
+              ),
+              Text(
+                _customer?.email ?? "",
+                style: MyTextStyles.headerlight,
+              ),
+            ],
+          ),
+        ),
         const Spacer(),
         SecondaryButton(
-            title: "Edit Profile", onTap: () {}, icon: Icons.person_2_outlined),
+            title: "Edit Profile",
+            onTap: () {
+              if (_customer?.id == null) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(const SnackBar(content: Text("No user!")));
+                return;
+              }
+              showEditProfileDialog(
+                  context, _customer?.id ?? '', _customer?.name ?? '');
+            },
+            icon: Icons.person_2_outlined),
         SecondaryButton(
             title: "Change Password",
             onTap: () => context.push('/change-password'),

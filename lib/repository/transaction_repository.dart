@@ -135,4 +135,26 @@ class TransactionRepostory {
       'payment': payment.toJson(),
     });
   }
+
+  Future<int> computeProductsSold(String productID) async {
+    int productsSold = 0;
+
+    CollectionReference transactionsCollection =
+        _firestore.collection(COLLECTION_NAME);
+
+    QuerySnapshot transactionsSnapshot = await transactionsCollection.get();
+
+    for (var transactionDoc in transactionsSnapshot.docs) {
+      List<dynamic> orderListData = transactionDoc['orderList'];
+      for (var orderItemData in orderListData) {
+        String productId = orderItemData['productID'];
+        int quantity = orderItemData['quantity'];
+        if (productId == productID) {
+          productsSold += quantity;
+        }
+      }
+    }
+
+    return productsSold;
+  }
 }

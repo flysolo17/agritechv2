@@ -38,6 +38,15 @@ class _ProductCardState extends State<ProductCard> {
     }
   }
 
+  int computeTotalStocks(Products products) {
+    int count = products.stocks;
+
+    for (var variation in products.variations) {
+      count += variation.stocks;
+    }
+    return count;
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -50,21 +59,44 @@ class _ProductCardState extends State<ProductCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
-              child: SizedBox(
-                height: 100,
-                width: double.infinity,
-                child: widget.product.images.isNotEmpty
-                    ? Image.network(
-                        widget.product.images[0],
-                        fit: BoxFit.cover,
-                      )
-                    : const Icon(Icons.image),
-              ),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
+                  child: SizedBox(
+                    height: 100,
+                    width: double.infinity,
+                    child: widget.product.images.isNotEmpty
+                        ? Image.network(
+                            widget.product.images[0],
+                            fit: BoxFit.cover,
+                          )
+                        : const Icon(Icons.image),
+                  ),
+                ),
+                if (computeTotalStocks(widget.product) == 0)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      color: Colors
+                          .red, // You can customize the color of the "sold out" label
+                      child: const Center(
+                        child: Text(
+                          'Sold Out',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.only(left: 10),
@@ -83,7 +115,7 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                   ),
                   Text(
-                    "${getEffectivePrice(widget.product)}",
+                    getEffectivePrice(widget.product),
                     style: const TextStyle(
                         color: ColorStyle.brandRed,
                         fontWeight: FontWeight.bold),

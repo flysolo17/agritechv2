@@ -86,4 +86,11 @@ class UserRepository {
       return null;
     }
   }
+
+  Future<void> editProfile(String uid, String name) {
+    return _firebaseFirestore
+        .collection(COLLECTION_NAME)
+        .doc(uid)
+        .update({'name': name});
+  }
 }

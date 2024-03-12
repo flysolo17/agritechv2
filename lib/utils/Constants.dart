@@ -47,7 +47,7 @@ bool areAllItemsAboveMinimum(List<OrderItems> orderItems) {
 num computeShipping(List<OrderItems> orderItems) {
   num shipping = 0.0;
   for (var item in orderItems) {
-    shipping += item.getShippingFee();
+    shipping += item.quantity * item.getShippingFee();
   }
   return shipping;
 }

@@ -15,7 +15,15 @@ class ReviewRepository {
   Future<void> createReview(Reviews reviews) {
     return _firebaseFirestore
         .collection(REVIEW_COLLECTION)
-        .add(reviews.toJson());
+        .doc(reviews.id)
+        .set(reviews.toJson());
+  }
+
+  Future<void> deleteReviews(String reviewID) {
+    return _firebaseFirestore
+        .collection(REVIEW_COLLECTION)
+        .doc(reviewID)
+        .delete();
   }
 
   Stream<List<Reviews>> getAllReviewByTransaction(String transactionID) {

@@ -7,6 +7,7 @@ import 'package:agritechv2/repository/review_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../styles/color_styles.dart';
 import '../../../utils/Constants.dart';
@@ -40,10 +41,11 @@ class _RatingPageState extends State<RatingPage> {
     });
   }
 
-  void showRatingModal(BuildContext context, OrderItems orderItems) {
+  void showRatingModal(
+      BuildContext context, OrderItems orderItems, Reviews? reviews) {
     final _formKey = GlobalKey<FormState>();
-    double _rating = 0.0;
-    String _review = '';
+    double _rating = reviews?.rating.toDouble() ?? 0.0;
+    String _review = reviews?.message ?? '';
 
     showModalBottomSheet(
       context: context,
@@ -61,16 +63,16 @@ class _RatingPageState extends State<RatingPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
+                  const Text(
                     'Add Review',
                     style: TextStyle(
                       fontSize: 20.0,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 20.0),
+                  const SizedBox(height: 20.0),
                   TextFormField(
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Review',
                       border: OutlineInputBorder(),
                     ),
@@ -85,8 +87,8 @@ class _RatingPageState extends State<RatingPage> {
                       _review = value;
                     },
                   ),
-                  SizedBox(height: 20.0),
-                  Text(
+                  const SizedBox(height: 20.0),
+                  const Text(
                     'Rating:',
                     style: TextStyle(
                       fontSize: 16.0,
@@ -101,7 +103,7 @@ class _RatingPageState extends State<RatingPage> {
                     allowHalfRating: true,
                     itemCount: 5,
                     itemSize: 40.0,
-                    itemBuilder: (context, _) => Icon(
+                    itemBuilder: (context, _) => const Icon(
                       Icons.star,
                       color: Colors.amber,
                     ),
@@ -109,16 +111,17 @@ class _RatingPageState extends State<RatingPage> {
                       _rating = rating;
                     },
                   ),
-                  SizedBox(height: 20.0),
+                  const SizedBox(height: 20.0),
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(10.0),
                     color: ColorStyle.brandRed,
                     child: TextButton(
+                      style: const ButtonStyle(),
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          Reviews reviews = Reviews(
-                              id: '',
+                          Reviews reviewsss = Reviews(
+                              id: reviews?.id ?? generateInvoiceID(),
                               transactionID: widget.transactions.id,
                               productID: orderItems.productID,
                               rating: _rating,
@@ -132,8 +135,9 @@ class _RatingPageState extends State<RatingPage> {
                               createdAt: DateTime.now());
                           context
                               .read<ReviewRepository>()
-                              .createReview(reviews)
+                              .createReview(reviewsss)
                               .then((value) => {
+                                    context.pop(),
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
                                             content: Text('Rating success')))
@@ -144,7 +148,7 @@ class _RatingPageState extends State<RatingPage> {
                                   });
                         }
                       },
-                      child: Text('Submit'),
+                      child: const Text('Submit'),
                     ),
                   ),
                 ],
@@ -167,7 +171,6 @@ class _RatingPageState extends State<RatingPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Text(widget.transactions.id),
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -180,7 +183,9 @@ class _RatingPageState extends State<RatingPage> {
                           review.productID ==
                           widget.transactions.orderList[index].productID)
                       .toList(),
-                  onTap: (items, message) => {showRatingModal(context, items)},
+                  onTap: (items, message, reviews) =>
+                      {showRatingModal(context, items, reviews)},
+                  onDelete: (String id) => {},
                 );
               },
             ),
@@ -191,15 +196,26 @@ class _RatingPageState extends State<RatingPage> {
   }
 }
 
+class ProductSold extends StatelessWidget {
+  const ProductSold({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Placeholder();
+  }
+}
+
 class ProductRatingCard extends StatelessWidget {
   final OrderItems orderItems;
   final List<Reviews> reviews;
-  Function(OrderItems items, String message) onTap;
+  Function(OrderItems items, String message, Reviews? reviews) onTap;
+  Function(String reviewID) onDelete;
   ProductRatingCard(
       {Key? key,
       required this.orderItems,
       required this.reviews,
-      required this.onTap})
+      required this.onTap,
+      required this.onDelete})
       : super(key: key);
 
   @override
@@ -253,7 +269,8 @@ class ProductRatingCard extends StatelessWidget {
             trailing: IconButton.filledTonal(
                 onPressed: () {
                   final current = reviews.isEmpty ? "" : reviews[0].message;
-                  onTap(orderItems, current);
+                  onTap(
+                      orderItems, current, reviews.isEmpty ? null : reviews[0]);
                 },
                 icon: Icon(reviews.isEmpty ? Icons.add : Icons.edit)),
           )

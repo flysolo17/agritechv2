@@ -23,6 +23,7 @@ class Transactions {
   Address? address;
   DateTime createdAt;
   TransactionSchedule? schedule;
+
   Transactions({
     required this.id,
     required this.customerID,

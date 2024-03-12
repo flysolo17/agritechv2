@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 
@@ -9,9 +10,12 @@ import 'package:agritechv2/models/transaction/OrderItems.dart';
 
 import 'package:agritechv2/repository/auth_repository.dart';
 import 'package:agritechv2/repository/review_repository.dart';
+import 'package:agritechv2/repository/transaction_repository.dart';
 import 'package:agritechv2/styles/color_styles.dart';
 import 'package:agritechv2/views/custom%20widgets/cart_action.dart';
 import 'package:agritechv2/views/nav/buy/buy_now.dart';
+import 'package:agritechv2/views/nav/ratings/product_rating.dart';
+import 'package:agritechv2/views/nav/ratings/rating.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,14 +47,16 @@ class Buy2Page extends StatefulWidget {
 class _Buy2PageState extends State<Buy2Page> {
   List<ReviewWithCustomer> _reviews = [];
 
+  StreamSubscription? _reviewSubscription;
+
   @override
   void initState() {
-    initReviewStreams(widget.productID);
     super.initState();
+    initReviewStreams(widget.productID);
   }
 
   void initReviewStreams(String productID) {
-    context
+    _reviewSubscription = context
         .read<ReviewRepository>()
         .combineStreams(widget.productID)
         .listen((event) {
@@ -58,6 +64,12 @@ class _Buy2PageState extends State<Buy2Page> {
         _reviews = event;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _reviewSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -140,6 +152,8 @@ class _Buy2PageState extends State<Buy2Page> {
                             margin: const EdgeInsets.symmetric(vertical: 10.0),
                             padding: const EdgeInsets.all(10.0),
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Row(
                                   mainAxisAlignment:
@@ -151,7 +165,7 @@ class _Buy2PageState extends State<Buy2Page> {
                                           fontWeight: FontWeight.bold),
                                     ),
                                     Text(
-                                      "${_reviews.length.toString()}",
+                                      _reviews.length.toString(),
                                     ),
                                   ],
                                 ),
@@ -162,54 +176,7 @@ class _Buy2PageState extends State<Buy2Page> {
                                       child: Text("No Review yet"),
                                     ),
                                   ),
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: _reviews.length,
-                                  itemBuilder: (context, index) {
-                                    final review = _reviews[index].reviews;
-                                    final customer = _reviews[index].customer;
-                                    return ListTile(
-                                      leading: customer?.profile != null ||
-                                              customer!.profile.isNotEmpty
-                                          ? CircleAvatar(
-                                              backgroundImage: NetworkImage(
-                                                customer!.profile,
-                                              ),
-                                            )
-                                          : const CircleAvatar(
-                                              child: Text('No Image'),
-                                            ),
-                                      title: Text(customer?.name ?? 'No name'),
-                                      subtitle: Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            RatingBarIndicator(
-                                              rating: review.rating.toDouble(),
-                                              itemCount: 5,
-                                              itemSize: 10.0,
-                                              physics:
-                                                  const BouncingScrollPhysics(),
-                                              itemBuilder: (context, _) =>
-                                                  const Icon(
-                                                Icons.star,
-                                                color: Colors.amber,
-                                              ),
-                                            ),
-                                            Text(
-                                              review.message,
-                                              style: TextStyle(fontSize: 12),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
+                                ProductRating(reviews: _reviews)
                               ],
                             ),
                           ),
@@ -230,6 +197,44 @@ class _Buy2PageState extends State<Buy2Page> {
           },
         ),
       ),
+    );
+  }
+}
+
+class ProductSold extends StatefulWidget {
+  final String productID;
+
+  const ProductSold({Key? key, required this.productID}) : super(key: key);
+
+  @override
+  State<ProductSold> createState() => _ProductSoldState();
+}
+
+class _ProductSoldState extends State<ProductSold> {
+  int productSold = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    initProductSold(widget.productID);
+  }
+
+  void initProductSold(String productID) {
+    context
+        .read<TransactionRepostory>()
+        .computeProductsSold(productID)
+        .then((value) {
+      setState(() {
+        productSold = value;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '$productSold sold',
+      style: const TextStyle(fontWeight: FontWeight.bold),
     );
   }
 }
@@ -780,10 +785,9 @@ class SalesInfo extends StatelessWidget {
                   const SizedBox(
                     width: 10,
                   ),
-                  Text(
-                    "100 sold",
-                    style: MyTextStyles.textBold,
-                  ),
+                  ProductSold(
+                    productID: products.id,
+                  )
                 ],
               ),
               HeartIcon(productID: products.id)
@@ -854,7 +858,7 @@ class CustomAppBar extends StatelessWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
-        padding: EdgeInsets.all(0),
+        padding: const EdgeInsets.all(0),
         icon: const Icon(
           Icons.arrow_back,
           size: 24,
@@ -866,7 +870,7 @@ class CustomAppBar extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(right: 10.0),
           child: Container(
-              padding: EdgeInsets.all(0),
+              padding: const EdgeInsets.all(0),
               decoration: BoxDecoration(
                 color: Colors.black
                     .withOpacity(0.2), // Background color with opacity

@@ -26,10 +26,7 @@ class OrderItems {
   }
 
   num getShippingFee() {
-    if (quantity >= shippingInfo.minimum) {
-      return shippingInfo.shipping;
-    }
-    return 0;
+    return shippingInfo.shipping;
   }
 
   Map<String, dynamic> toJson() {

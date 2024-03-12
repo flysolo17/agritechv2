@@ -23,6 +23,7 @@ class Reviews {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'transactionID': transactionID,
       'productID': productID,
       'rating': rating,
@@ -35,7 +36,7 @@ class Reviews {
 
   factory Reviews.fromJson(String docID, Map<String, dynamic> json) {
     return Reviews(
-      id: docID,
+      id: json['id'],
       transactionID: json['transactionID'],
       productID: json['productID'],
       rating: json['rating'],
