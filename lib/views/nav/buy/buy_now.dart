@@ -171,6 +171,8 @@ class _BuyNowPageState extends State<BuyNowPage> {
                         variationID:
                             widget.products.variations[_selectedIndex].id,
                         quantity: _quantity,
+                        maxQuantity:
+                            widget.products.variations[_selectedIndex].stocks,
                         cost: widget.products.variations[_selectedIndex].cost,
                         price: widget.products.variations[_selectedIndex].price,
                         imageUrl:

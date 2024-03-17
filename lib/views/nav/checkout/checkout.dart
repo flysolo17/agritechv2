@@ -409,6 +409,14 @@ class _OrderDetailsState extends State<OrderDetails> {
                 ),
               ),
             ],
+          ),
+          const Text(
+            "Orders placed outside business hours (9:00 AM to 3:00 PM) will be processed during our next open hours",
+            style: TextStyle(
+              fontSize: 10,
+              color: ColorStyle.brandRed,
+              fontWeight: FontWeight.bold,
+            ),
           )
         ],
       ),

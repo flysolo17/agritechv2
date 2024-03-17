@@ -63,7 +63,7 @@ class NewsCard extends StatelessWidget {
               "lib/assets/images/logo.png",
               height: 60,
             ),
-            title: const Text("JJF STORE"),
+            title: const Text("S&P Inc."),
             subtitle:
                 Text(DateFormat('EEE d MMM yyyy').format(newsLetter.createdAt)),
           ),

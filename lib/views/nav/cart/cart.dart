@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:agritechv2/styles/color_styles.dart';
 import 'package:collection/collection.dart';
@@ -86,11 +87,13 @@ class _CartPageState extends State<CartPage> {
                             cartWithProduct: cart,
                             selected: orders.any((orderMap) =>
                                 orderMap.containsKey(cart.cart.id)),
-                            onCartClicked: (bool isChecked) {
+                            onCartClicked: (bool isChecked, int max) {
                               setState(() {
                                 if (isChecked) {
-                                  orders.add(
-                                      {cart.cart.id: createOrderItems(cart)});
+                                  // int max = cart.cart.isVariation ?
+                                  orders.add({
+                                    cart.cart.id: createOrderItems(cart, max)
+                                  });
                                 } else {
                                   orders.removeWhere((element) =>
                                       element.containsKey(cart.cart.id));
@@ -161,13 +164,14 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  OrderItems createOrderItems(CartWithProduct cartWithProduct) {
+  OrderItems createOrderItems(CartWithProduct cartWithProduct, int max) {
     return OrderItems(
       productID: cartWithProduct.products.id,
       productName: cartWithProduct.products.name,
       isVariation: cartWithProduct.cart.isVariation,
       variationID: cartWithProduct.cart.variationID ?? '',
       quantity: cartWithProduct.cart.quantity,
+      maxQuantity: max,
       cost: cartWithProduct.products.cost,
       price: cartWithProduct.products.price,
       imageUrl: cartWithProduct.products.images.isNotEmpty
@@ -182,7 +186,7 @@ class CartCard extends StatelessWidget {
   final CartWithProduct cartWithProduct;
   final bool selected;
 
-  final Function(bool selected) onCartClicked;
+  final Function(bool selected, int max) onCartClicked;
 
   CartCard({
     Key? key,
@@ -224,7 +228,12 @@ class CartCard extends StatelessWidget {
                   Checkbox(
                     value: selected,
                     onChanged: (bool? value) {
-                      onCartClicked(value ?? false);
+                      onCartClicked(
+                        value ?? false,
+                        variation != null
+                            ? variation.stocks
+                            : cartWithProduct.products.stocks,
+                      );
                     },
                   ),
                   Expanded(

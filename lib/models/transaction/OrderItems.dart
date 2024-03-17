@@ -6,6 +6,7 @@ class OrderItems {
   bool isVariation;
   String variationID;
   int quantity;
+  int maxQuantity;
   num cost;
   num price;
   String imageUrl;
@@ -17,6 +18,7 @@ class OrderItems {
       required this.isVariation,
       required this.variationID,
       required this.quantity,
+      required this.maxQuantity,
       required this.cost,
       required this.price,
       required this.imageUrl,
@@ -36,6 +38,7 @@ class OrderItems {
       'isVariation': isVariation,
       'variationID': variationID,
       'quantity': quantity,
+      'maxQuantity': maxQuantity,
       'cost': cost,
       'price': price,
       'imageUrl': imageUrl,
@@ -53,6 +56,7 @@ class OrderItems {
         cost: json['cost'],
         price: json['price'],
         imageUrl: json['imageUrl'],
-        shippingInfo: ShippingInfo.fromJson(json['shippingInfo']));
+        shippingInfo: ShippingInfo.fromJson(json['shippingInfo']),
+        maxQuantity: json['maxQuantity']);
   }
 }

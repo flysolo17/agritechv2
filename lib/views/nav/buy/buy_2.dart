@@ -146,40 +146,40 @@ class _Buy2PageState extends State<Buy2Page> {
                               ],
                             ),
                           ),
-                          Container(
-                            width: double.infinity,
-                            color: Colors.white,
-                            margin: const EdgeInsets.symmetric(vertical: 10.0),
-                            padding: const EdgeInsets.all(10.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text(
-                                      "Reviews",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      _reviews.length.toString(),
-                                    ),
-                                  ],
-                                ),
-                                if (_reviews.isEmpty)
-                                  const SizedBox(
-                                    height: 100,
-                                    child: Center(
-                                      child: Text("No Review yet"),
-                                    ),
-                                  ),
-                                ProductRating(reviews: _reviews)
-                              ],
-                            ),
-                          ),
+                          // Container(
+                          //   width: double.infinity,
+                          //   color: Colors.white,
+                          //   margin: const EdgeInsets.symmetric(vertical: 10.0),
+                          //   padding: const EdgeInsets.all(10.0),
+                          //   child: Column(
+                          //     crossAxisAlignment: CrossAxisAlignment.start,
+                          //     mainAxisAlignment: MainAxisAlignment.start,
+                          //     children: [
+                          //       Row(
+                          //         mainAxisAlignment:
+                          //             MainAxisAlignment.spaceBetween,
+                          //         children: [
+                          //           const Text(
+                          //             "Reviews",
+                          //             style: TextStyle(
+                          //                 fontWeight: FontWeight.bold),
+                          //           ),
+                          //           Text(
+                          //             _reviews.length.toString(),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //       if (_reviews.isEmpty)
+                          //         const SizedBox(
+                          //           height: 100,
+                          //           child: Center(
+                          //             child: Text("No Review yet"),
+                          //           ),
+                          //         ),
+                          //       ProductRating(reviews: _reviews)
+                          //     ],
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -332,6 +332,7 @@ class ButtonActions extends StatelessWidget {
                         isVariation: false,
                         variationID: "",
                         quantity: 1,
+                        maxQuantity: products.stocks,
                         cost: products.cost,
                         price: products.price,
                         imageUrl: products.images[0],

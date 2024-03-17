@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:agritechv2/models/product/Products.dart';
 import 'package:agritechv2/models/transaction/OrderItems.dart';
 import 'package:agritechv2/models/transaction/TransactionType.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import '../../utils/Constants.dart';
 
 class OrderItemContainer extends StatelessWidget {
   final OrderItems orderItems;
+
   Function(int quantity) changeQuantity;
   final TransactionType type;
   OrderItemContainer(
@@ -82,7 +84,7 @@ class OrderItemContainer extends StatelessWidget {
                             fontWeight: FontWeight.w400, color: Colors.black),
                       ),
                       InputQty(
-                        maxVal: 100,
+                        maxVal: orderItems.maxQuantity,
                         initVal: orderItems.quantity,
                         minVal: 1,
                         steps: 1,

@@ -20,6 +20,8 @@ class FeaturedProductCard extends StatelessWidget {
         isVariation: isVariation,
         variationID: isVariation ? product.variations[0].id : "",
         quantity: 1,
+        maxQuantity:
+            isVariation ? product.variations[0].stocks : product.stocks,
         cost: isVariation ? product.variations[0].cost : product.cost,
         price: isVariation ? product.variations[0].price : product.price,
         imageUrl: product.images[0],
