@@ -11,7 +11,7 @@ class ChatBotPage extends StatefulWidget {
 }
 
 class _ChatBotPageState extends State<ChatBotPage> {
-  final String key = dotenv.env['API_KEY'] ?? '';
+  final String key = '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';
   final ChatUser _user = ChatUser(
     id: '1',
     firstName: 'Charles',
@@ -64,7 +64,9 @@ class _ChatBotPageState extends State<ChatBotPage> {
       messages: history.reversed.toList(),
       maxToken: 200,
     );
-    final response = await _openAI.onChatCompletion(request: request);
+    final response = await _openAI
+        .onChatCompletion(request: request)
+        .catchError((err) => print(key));
 
     setState(() {
       if (response != null) {
