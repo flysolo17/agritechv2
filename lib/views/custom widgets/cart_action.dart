@@ -23,7 +23,18 @@ class CartAction extends StatelessWidget {
             context.read<AuthRepository>().currentUser?.uid ?? ''),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Icon(Icons.error);
+            return badges.Badge(
+              position: badges.BadgePosition.topEnd(top: 0, end: 3),
+              badgeAnimation: const badges.BadgeAnimation.slide(),
+              showBadge: true,
+              badgeStyle: const badges.BadgeStyle(
+                badgeColor: Colors.red,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.shopping_cart),
+                onPressed: () => context.push("/cart"),
+              ),
+            );
           }
 
           if (snapshot.data != null) {
@@ -45,7 +56,18 @@ class CartAction extends StatelessWidget {
               ),
             );
           } else {
-            return const Icon(Icons.error);
+            return badges.Badge(
+              position: badges.BadgePosition.topEnd(top: 0, end: 3),
+              badgeAnimation: const badges.BadgeAnimation.slide(),
+              showBadge: true,
+              badgeStyle: const badges.BadgeStyle(
+                badgeColor: Colors.red,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.shopping_cart),
+                onPressed: () => context.push("/cart"),
+              ),
+            );
           }
         });
   }

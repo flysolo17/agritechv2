@@ -11,7 +11,7 @@ class ChatBotPage extends StatefulWidget {
 }
 
 class _ChatBotPageState extends State<ChatBotPage> {
-  final String key = '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';
+  final String key = dotenv.env['API_KEY'] ?? '';
   final ChatUser _user = ChatUser(
     id: '1',
     firstName: 'Charles',
@@ -27,8 +27,6 @@ class _ChatBotPageState extends State<ChatBotPage> {
   late OpenAI _openAI;
   @override
   void initState() {
-    print("MY API KEY: $key");
-
     _openAI = OpenAI.instance.build(
         token: key,
         baseOption: HttpSetup(
@@ -66,7 +64,7 @@ class _ChatBotPageState extends State<ChatBotPage> {
     );
     final response = await _openAI
         .onChatCompletion(request: request)
-        .catchError((err) => print(key));
+        .catchError((err) => print(err));
 
     setState(() {
       if (response != null) {
