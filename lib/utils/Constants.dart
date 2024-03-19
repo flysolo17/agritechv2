@@ -1,6 +1,8 @@
+import 'package:agritechv2/models/Address.dart';
 import 'package:agritechv2/models/transaction/OrderItems.dart';
 import 'package:agritechv2/models/transaction/TransactionSchedule.dart';
 import 'package:agritechv2/models/transaction/TransactionStatus.dart';
+import 'package:agritechv2/models/users/Customer.dart';
 import 'package:agritechv2/models/users/Users.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -434,4 +436,11 @@ String formatTimeDifference(DateTime dateTime) {
   } else {
     return 'just now';
   }
+}
+
+Address? getDefaultAddress(Customer customer) {
+  if (customer.addresses.isEmpty) {
+    return null;
+  }
+  return customer.getDefaultAddress();
 }

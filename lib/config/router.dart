@@ -150,7 +150,7 @@ class AppRouter {
                   (jsonDecode(state.extra.toString()) as List)
                       .map((item) => OrderItems.fromJson(item))
                       .toList();
-              return CheckOutPage(orderItems: orderItems);
+              return CheckoutPage(orderItems: orderItems);
             },
           ),
           GoRoute(

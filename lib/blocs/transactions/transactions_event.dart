@@ -49,6 +49,15 @@ class GetTransactionsByStatus extends TransactionsEvent {
   List<Object> get props => [status, customerID];
 }
 
+class SubmitTransactionEvent extends TransactionsEvent {
+  final Transactions transactions;
+
+  const SubmitTransactionEvent(this.transactions);
+
+  @override
+  List<Object> get props => [transactions];
+}
+
 class CancelTransactionEvent extends TransactionsEvent {
   final String transactionID;
   final String name;

@@ -10,7 +10,6 @@ import '../../utils/Constants.dart';
 
 class OrderItemContainer extends StatelessWidget {
   final OrderItems orderItems;
-
   Function(int quantity) changeQuantity;
   final TransactionType type;
   OrderItemContainer(

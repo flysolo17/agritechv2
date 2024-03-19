@@ -4,6 +4,7 @@ import 'package:agritechv2/models/Address.dart';
 import 'package:agritechv2/models/transaction/ShippingFee.dart';
 import 'package:agritechv2/models/transaction/TransactionSchedule.dart';
 import 'package:agritechv2/models/transaction/TransactionType.dart';
+import 'package:agritechv2/utils/Constants.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -21,6 +22,19 @@ class TransactionRepostory {
   TransactionRepostory({FirebaseFirestore? firestore, FirebaseStorage? storage})
       : _firestore = firestore ?? FirebaseFirestore.instance,
         _storage = storage ?? FirebaseStorage.instance;
+
+  Future<void> submitTransaction(Transactions transaction) async {
+    transaction.id = generateInvoiceID();
+    try {
+      await _firestore
+          .collection(COLLECTION_NAME)
+          .doc(transaction.id)
+          .set(transaction.toJson());
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   Future<void> createTransaction(
     String transactionID,
     String customerID,

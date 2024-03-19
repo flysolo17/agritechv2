@@ -26,6 +26,7 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
         super(TransactionsInitial()) {
     on<TransactionsEvent>((event, emit) {});
     on<CreateTransactionEvent>(_onCreateTransaction);
+    on<SubmitTransactionEvent>(_onSubmitTransaction);
     on<GetTransactionsByStatus>(_onGetTransactionsByStatus);
     on<CancelTransactionEvent>(_onCancelTransaction);
     on<AddGcashPayment>(_onGcashPayment);
@@ -49,6 +50,19 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
           event.address);
       Future.delayed(const Duration(seconds: 2));
       emit(TransactionsSuccessState<String>(transactionID));
+    } catch (e) {
+      emit(TransactionsFailedState(e.toString()));
+      emit(TransactionsInitial());
+    }
+  }
+
+  Future<void> _onSubmitTransaction(
+      SubmitTransactionEvent event, Emitter<TransactionsState> emit) async {
+    emit(TransactionsLoadingState());
+    try {
+      await _transactionRepostory.submitTransaction(event.transactions);
+      Future.delayed(const Duration(seconds: 2));
+      emit(TransactionsSuccessState<String>("Transaction Submitted"));
     } catch (e) {
       emit(TransactionsFailedState(e.toString()));
       emit(TransactionsInitial());
