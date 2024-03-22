@@ -11,7 +11,7 @@ class MessageContainer extends StatefulWidget {
 }
 
 class _MessageCardState extends State<MessageContainer> {
-  TextEditingController _messageController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
 
   @override
   void initState() {

@@ -62,7 +62,7 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     try {
       await _transactionRepostory.submitTransaction(event.transactions);
       Future.delayed(const Duration(seconds: 2));
-      emit(TransactionsSuccessState<String>("Transaction Submitted"));
+      emit(const TransactionsSuccessState<String>("Transaction Submitted"));
     } catch (e) {
       emit(TransactionsFailedState(e.toString()));
       emit(TransactionsInitial());

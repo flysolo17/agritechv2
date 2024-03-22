@@ -71,14 +71,15 @@ class _ConversationPageState extends State<ConversationPage> {
     messagesRepository
         .getConversation(customerID, widget.users.id)
         .listen((event) {
+      print(event.length);
+      List<ChatMessage> messages = event
+          .map((e) => ChatMessage(
+              user: e.role == Role.CUSTOMER ? _customer : _staff,
+              createdAt: e.createdAt,
+              text: e.message))
+          .toList();
+      _messageList.clear();
       setState(() {
-        List<ChatMessage> messages = event
-            .map((e) => ChatMessage(
-                user: e.role == Role.CUSTOMER ? _customer : _staff,
-                createdAt: e.createdAt,
-                text: e.message))
-            .toList();
-        _messageList.clear();
         _messageList.addAll(messages);
       });
     });

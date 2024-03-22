@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:go_router/go_router.dart';
 
 import '../../../models/Address.dart';
 import '../../../models/transaction/TransactionType.dart';
 import '../../../models/users/Customer.dart';
-import '../../../repository/auth_repository.dart';
-import '../../../repository/customer_repository.dart';
+
 import '../../../utils/Constants.dart';
 
 class CustomerInfo extends StatelessWidget {
