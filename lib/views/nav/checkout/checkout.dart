@@ -43,6 +43,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Customer? _customer;
   TransactionType _transactionType = TransactionType.DELIVERY;
   PaymentType? _paymentType;
+
   @override
   void initState() {
     _customerStream = context
@@ -214,13 +215,15 @@ class ConfirmCheckout extends StatelessWidget {
   final PaymentType? paymentType;
   final Customer? customer;
   final String message;
-  const ConfirmCheckout(
-      {super.key,
-      required this.orders,
-      required this.transactionType,
-      required this.paymentType,
-      required this.customer,
-      required this.message});
+
+  const ConfirmCheckout({
+    super.key,
+    required this.orders,
+    required this.transactionType,
+    required this.paymentType,
+    required this.customer,
+    required this.message,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -235,6 +238,7 @@ class ConfirmCheckout extends StatelessWidget {
         cashierID: '',
         type: transactionType,
         orderList: orders,
+        address: customer?.getDefaultAddress(),
         message: message,
         status: TransactionStatus.PENDING,
         details: [
@@ -295,7 +299,7 @@ class ConfirmCheckout extends StatelessWidget {
                         }
                       }
                       if (transactionType == TransactionType.DELIVERY &&
-                          customer?.getDefaultAddress() == null) {
+                          transactions.address == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                                 content: Text("Please add address")));
