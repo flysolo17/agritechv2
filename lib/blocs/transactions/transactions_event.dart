@@ -77,6 +77,5 @@ class AddGcashPayment extends TransactionsEvent {
       this.file, this.customerName, this.transactionID, this.payment);
 
   @override
-  List<Object> get props =>
-      [transactionID, customerName, transactionID, payment];
+  List<Object> get props => [file, customerName, transactionID, payment];
 }

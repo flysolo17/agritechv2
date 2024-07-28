@@ -57,6 +57,9 @@ class ProductRepository {
     Future.delayed(const Duration(seconds: 1), () {
       _firebaseFirestore
           .collection(COLLECTION_NAME)
+          .where('expiryDate', isGreaterThan: DateTime.now())
+          .where('isHidden', isEqualTo: false)
+          .orderBy('expiryDate')
           .orderBy('createdAt', descending: true)
           .snapshots()
           .listen((QuerySnapshot<Map<String, dynamic>> snapshot) {
@@ -77,6 +80,9 @@ class ProductRepository {
       _firebaseFirestore
           .collection(COLLECTION_NAME)
           .where('featured', isEqualTo: true)
+          .where('expiryDate', isGreaterThan: DateTime.now())
+          .where('isHidden', isEqualTo: false)
+          .orderBy('expiryDate')
           .orderBy('createdAt')
           .snapshots()
           .listen((QuerySnapshot<Map<String, dynamic>> snapshot) {

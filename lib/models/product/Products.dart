@@ -16,6 +16,7 @@ class Products {
   DateTime expiryDate;
   List<Reviews> reviews;
   ShippingInfo shippingInformation;
+  bool isHidden;
   bool featured;
   DateTime createdAt;
 
@@ -32,6 +33,7 @@ class Products {
     required this.expiryDate,
     required this.reviews,
     required this.shippingInformation,
+    required this.isHidden,
     required this.featured,
     required this.createdAt,
   });
@@ -50,6 +52,7 @@ class Products {
       expiryDate: (json['expiryDate'] as Timestamp).toDate(),
       reviews: [],
       shippingInformation: ShippingInfo.fromJson(json['shippingInformation']),
+      isHidden: json['isHidden'],
       featured: json['featured'],
       createdAt: (json['createdAt'] as Timestamp).toDate(),
     );
@@ -69,6 +72,7 @@ class Products {
       'expiryDate': expiryDate.toIso8601String(), // Convert to ISO 8601 string
       'reviews': variations.map((v) => v.toJson()).toList(),
       'shippingInformation': shippingInformation.toJson(),
+      'isHidden': isHidden,
       'featured': featured,
       'createdAt': createdAt.toIso8601String(),
     };

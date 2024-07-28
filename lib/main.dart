@@ -3,6 +3,7 @@ import 'package:agritechv2/blocs/product/product_bloc.dart';
 import 'package:agritechv2/repository/audit_repository.dart';
 import 'package:agritechv2/repository/auth_repository.dart';
 import 'package:agritechv2/repository/cart_repository.dart';
+import 'package:agritechv2/repository/content_repository.dart';
 import 'package:agritechv2/repository/customer_repository.dart';
 import 'package:agritechv2/repository/favorites_repository.dart';
 import 'package:agritechv2/repository/message_repository.dart';
@@ -68,6 +69,9 @@ class MyApp extends StatelessWidget {
         ),
         RepositoryProvider(
           create: (context) => ReviewRepository(),
+        ),
+        RepositoryProvider(
+          create: (context) => ContentRepository(),
         ),
       ],
       child: MultiBlocProvider(

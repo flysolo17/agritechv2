@@ -66,24 +66,29 @@ class CartRepository {
         .snapshots()
         .listen((QuerySnapshot<Map<String, dynamic>> snapshot) async {
       cartWithProductList = [];
+
       for (var doc in snapshot.docs) {
-        print(snapshot.docs.length);
-
         final cart = Cart.fromJson(doc.data());
-
         final productID = cart.productID;
+
         var productSnapshot = await _firebaseFirestore
             .collection('products')
             .doc(productID)
             .get();
+
         if (productSnapshot.exists) {
           final product =
               Products.fromJson(productSnapshot.data() as Map<String, dynamic>);
-          cartWithProductList
-              .add(CartWithProduct(cart: cart, products: product));
+
+          if (product.isHidden == false &&
+              !product.expiryDate.isBefore(DateTime.now())) {
+            cartWithProductList
+                .add(CartWithProduct(cart: cart, products: product));
+          }
         }
-        streamController.add(cartWithProductList);
       }
+
+      streamController.add(cartWithProductList);
     });
 
     return streamController.stream;

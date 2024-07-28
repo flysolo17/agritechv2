@@ -1,10 +1,13 @@
 import 'dart:convert';
 
 import 'package:agritechv2/models/pest/pest_map.dart';
+import 'package:agritechv2/repository/content_repository.dart';
 import 'package:agritechv2/repository/pest_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../models/cms/TopicSubject.dart';
 
 class MapPage extends StatelessWidget {
   const MapPage({super.key});
@@ -19,15 +22,27 @@ class MapPage extends StatelessWidget {
 
     return Stack(
       children: [
-        ListView.builder(
-          itemCount: maps.length,
-          itemBuilder: (context, index) {
-            final pestMap = maps[index];
-
-            return PestMapCard(
-              image: pestMap['image'] ?? '',
-              topic: pestMap['topic'] ?? '',
-            );
+        StreamBuilder<List<TopicSubject>>(
+          stream: ContentRepository().getAllTopicSubject(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(child: Text('No data available'));
+            } else {
+              final topicSubjects = snapshot.data!;
+              return ListView.builder(
+                itemCount: topicSubjects.length,
+                itemBuilder: (context, index) {
+                  final topicSubject = topicSubjects[index];
+                  return PestMapCard(
+                    topicSubject: topicSubject,
+                  );
+                },
+              );
+            }
           },
         ),
         Positioned(
@@ -46,27 +61,47 @@ class MapPage extends StatelessWidget {
 }
 
 class PestMapCard extends StatelessWidget {
-  final String image;
-  final String topic;
-  const PestMapCard({super.key, required this.image, required this.topic});
+  final TopicSubject topicSubject;
+  const PestMapCard({super.key, required this.topicSubject});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => {context.push("/view-pest-map", extra: topic.toString())},
+      onTap: () =>
+          {context.push("/view-pest-map", extra: topicSubject.id.toString())},
       child: Container(
         height: 150,
         margin: const EdgeInsets.all(8.0),
         padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            image: DecorationImage(
-              image: AssetImage(
-                image,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          image: DecorationImage(
+            image: NetworkImage(
+              topicSubject.cover,
+            ),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                child: Text(
+                  topicSubject.name,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-              fit: BoxFit.cover,
-            )),
+            ),
+          ],
+        ),
       ),
     );
   }
