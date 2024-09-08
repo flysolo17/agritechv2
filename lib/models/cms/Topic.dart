@@ -7,6 +7,7 @@ class Topic {
   String desc;
   String image;
   List<String> recomendations;
+  String category;
   DateTime createdAt;
   DateTime? updatedAt;
 
@@ -16,6 +17,7 @@ class Topic {
     required this.title,
     required this.desc,
     required this.image,
+    required this.category,
     required this.recomendations,
     required this.createdAt,
     this.updatedAt,
@@ -29,6 +31,7 @@ class Topic {
       title: data['title'] as String,
       desc: data['desc'] as String,
       image: data['image'] as String,
+      category: data['category'] as String,
       recomendations: List<String>.from(data['recomendations']),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: data['updatedAt'] != null
@@ -44,6 +47,7 @@ class Topic {
       'title': title,
       'desc': desc,
       'image': image,
+      'category': category,
       'recomendations': recomendations,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,

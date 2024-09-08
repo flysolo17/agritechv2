@@ -6,6 +6,7 @@ import 'package:agritechv2/repository/cart_repository.dart';
 import 'package:agritechv2/repository/content_repository.dart';
 import 'package:agritechv2/repository/customer_repository.dart';
 import 'package:agritechv2/repository/favorites_repository.dart';
+import 'package:agritechv2/repository/gcash-repository.dart';
 import 'package:agritechv2/repository/message_repository.dart';
 import 'package:agritechv2/repository/newsletter.dart';
 import 'package:agritechv2/repository/pest_repository.dart';
@@ -72,6 +73,9 @@ class MyApp extends StatelessWidget {
         ),
         RepositoryProvider(
           create: (context) => ContentRepository(),
+        ),
+        RepositoryProvider(
+          create: (context) => GcashRepository(),
         ),
       ],
       child: MultiBlocProvider(

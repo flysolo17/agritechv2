@@ -45,11 +45,11 @@ class UserPages extends StatelessWidget {
                                         .cover, // Adjust the fit as needed
                                   ),
                                 )
-                              : Image.network(
-                                  user.profile, // Use the user's profile image URL
-                                  width: 80,
-                                  height: 80,
-                                  fit: BoxFit.cover,
+                              : CircleAvatar(
+                                  radius: 40,
+                                  backgroundImage: NetworkImage(
+                                    user.profile,
+                                  ),
                                 ),
                         ),
                         const SizedBox(

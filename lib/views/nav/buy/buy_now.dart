@@ -161,7 +161,8 @@ class _BuyNowPageState extends State<BuyNowPage> {
             ),
           const Spacer(),
           ElevatedButton(
-            onPressed: _selectedIndex == -1
+            onPressed: _selectedIndex == -1 ||
+                    widget.products.variations[_selectedIndex].stocks < 1
                 ? null
                 : () {
                     OrderItems orderItems = OrderItems(

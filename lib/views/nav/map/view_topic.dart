@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:agritechv2/models/pest/pest_map.dart';
+import 'package:agritechv2/models/cms/contents.dart';
 import 'package:agritechv2/models/product/Products.dart';
 import 'package:agritechv2/repository/product_repository.dart';
 import 'package:dio/dio.dart';
@@ -15,16 +15,18 @@ import 'package:go_router/go_router.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../../models/cms/Topic.dart';
+import '../../../repository/content_repository.dart';
 import '../../../styles/color_styles.dart';
 import '../../../utils/Constants.dart';
 
 class ViewTopic extends StatelessWidget {
-  final PestMap map;
-  const ViewTopic({super.key, required this.map});
+  final Topic topic;
+
+  const ViewTopic({super.key, required this.topic});
 
   @override
   Widget build(BuildContext context) {
-    print(map.recomendations);
     return Scaffold(
       appBar: AppBar(
         title: Text(""),
@@ -36,13 +38,13 @@ class ViewTopic extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.network(
-              map.image,
+              topic.image,
               width: double.infinity,
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                map.title,
+                topic.title,
                 style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -51,21 +53,36 @@ class ViewTopic extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(map.desc),
+              child: Text(topic.desc),
             ),
-            ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: map.contents.length,
-                itemBuilder: (context, index) {
-                  final content = map.contents[index];
-                  final lastIndex = map.contents.length - 1;
-                  if (lastIndex == index &&
-                      map.contents[lastIndex].image.isNotEmpty) {
-                    return ProgramCard(contents: content);
-                  }
-                  return ContentContainer(contents: content);
-                }),
+            StreamBuilder<List<Contents>>(
+              stream:
+                  context.read<ContentRepository>().getAllContents(topic.id),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else {
+                  List<Contents> contents = snapshot.data ?? [];
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: contents.length,
+                    itemBuilder: (context, index) {
+                      final content = contents[index];
+                      final lastIndex = contents.length - 1;
+                      if (lastIndex == index &&
+                          contents[lastIndex].image.isNotEmpty) {
+                        return ProgramCard(contents: content);
+                      }
+                      return ContentContainer(contents: content);
+                    },
+                  );
+                }
+              },
+            ),
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
@@ -73,15 +90,30 @@ class ViewTopic extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: map.recomendations.length,
-                itemBuilder: (context, index) {
-                  final productID = map.recomendations[index];
-                  print(productID);
-                  return SuggestedProducts(productID: productID);
-                }),
+            StreamBuilder<List<Products>>(
+              stream: context
+                  .read<ContentRepository>()
+                  .getProductRecommendation(topic.recomendations),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else {
+                  List<Products> products = snapshot.data ?? [];
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return SuggestedProducts(product: product);
+                    },
+                  );
+                }
+              },
+            ),
           ],
         ),
       ),
@@ -202,56 +234,34 @@ class ContentContainer extends StatelessWidget {
 }
 
 class SuggestedProducts extends StatelessWidget {
-  final String productID;
-  const SuggestedProducts({super.key, required this.productID});
+  final Products product;
+  const SuggestedProducts({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Products>(
-      future: context.read<ProductRepository>().getProductById(productID),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return shimmerLoading1(); // Loa
-        } else if (snapshot.hasError) {
-          return Center(
-            child: Text('Error: ${snapshot.error}'),
-          );
-        } else if (snapshot.hasData) {
-          final product = snapshot.data;
-          print(product);
-          print("jm");
-          return ListTile(
-            onTap: () {
-              context.push("/product/${product.id}");
-            },
-            hoverColor: Colors.grey[200],
-            leading: Image.network(
-              product!.images[0],
-              width: 100,
-              height: 100,
-            ),
-            dense: true,
-            title: Text(
-              product.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontSize: 20),
-            ),
-            subtitle: Text(
-              getEffectivePrice(product),
-              style: const TextStyle(fontSize: 16),
-            ),
-            trailing: const Icon(Icons.favorite),
-          );
-        } else {
-          return const Center(
-            child: Text('Product not found'),
-          );
-        }
+    return ListTile(
+      onTap: () {
+        context.push("/product/${product.id}");
       },
+      hoverColor: Colors.grey[200],
+      leading: Image.network(
+        product.images[0],
+        width: 100,
+        height: 100,
+      ),
+      dense: true,
+      title: Text(
+        product.name,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+            fontWeight: FontWeight.bold, color: Colors.black, fontSize: 20),
+      ),
+      subtitle: Text(
+        getEffectivePrice(product),
+        style: const TextStyle(fontSize: 16),
+      ),
+      trailing: const Icon(Icons.favorite),
     );
   }
 }

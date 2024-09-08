@@ -191,7 +191,9 @@ class _SignUpPageState extends State<SignUpPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              context.push('/terms');
+                            },
                             child: Text(
                               "I hereby agree to the Program Mechanics and Terms",
                               style: MyTextStyles.text,
@@ -218,11 +220,14 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.7,
-                      child: Text(
-                        "I hereby agree that all information I provided here can be processed and used by Agritech in accourdance with their Privacy Policy",
-                        style: MyTextStyles.text,
+                    GestureDetector(
+                      onTap: () => {context.push('/terms')},
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        child: Text(
+                          "I hereby agree that all information I provided here can be processed and used by Agritech in accourdance with their Privacy Policy",
+                          style: MyTextStyles.text,
+                        ),
                       ),
                     ),
                   ],

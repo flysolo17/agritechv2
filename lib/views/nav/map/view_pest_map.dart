@@ -1,12 +1,15 @@
 import 'dart:convert';
 
-import 'package:agritechv2/models/pest/pest_map.dart';
+import 'package:agritechv2/repository/content_repository.dart';
 import 'package:agritechv2/repository/pest_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../models/cms/Topic.dart';
 import '../../../styles/color_styles.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ViewPestMapPage extends StatelessWidget {
   final String topic;
@@ -16,19 +19,19 @@ class ViewPestMapPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(topic),
+        title: Text(""),
         backgroundColor: ColorStyle.brandRed,
       ),
       backgroundColor: Colors.grey[200],
-      body: StreamBuilder<List<PestMap>>(
-        stream: context.read<PestRepository>().getAllPestMap(topic),
+      body: StreamBuilder<List<Topic>>(
+        stream: context.read<ContentRepository>().getAllTopics(topic),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            List<PestMap> pestMap = snapshot.data ?? [];
+            List<Topic> topics = snapshot.data ?? [];
 
             return DefaultTabController(
               length: 4,
@@ -57,17 +60,17 @@ class ViewPestMapPage extends StatelessWidget {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        TabContainer(maps: pestMap),
+                        TabContainer(maps: topics),
                         TabContainer(
-                            maps: pestMap
+                            maps: topics
                                 .where((e) => e.category == "INSECTS")
                                 .toList()),
                         TabContainer(
-                            maps: pestMap
+                            maps: topics
                                 .where((e) => e.category == "DISEASES")
                                 .toList()),
                         TabContainer(
-                            maps: pestMap
+                            maps: topics
                                 .where((e) => e.category == "WEEDS")
                                 .toList()),
                       ],
@@ -84,7 +87,7 @@ class ViewPestMapPage extends StatelessWidget {
 }
 
 class TabContainer extends StatelessWidget {
-  final List<PestMap> maps;
+  final List<Topic> maps;
   const TabContainer({super.key, required this.maps});
   String? extractSampleString(String text) {
     final RegExp regex = RegExp(r'\((.*?)\)');
@@ -136,7 +139,7 @@ class TabContainer extends StatelessWidget {
                           fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      extractSampleString(maps[index].title ?? '') ?? '',
+                      maps[index].desc,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

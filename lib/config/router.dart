@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:agritechv2/models/Address.dart';
 import 'package:agritechv2/models/users/Customer.dart';
-import 'package:agritechv2/models/pest/pest_map.dart';
+
 import 'package:agritechv2/models/product/Cart.dart';
 import 'package:agritechv2/models/transaction/OrderItems.dart';
 import 'package:agritechv2/models/transaction/PaymentMethod.dart';
@@ -11,6 +11,7 @@ import 'package:agritechv2/models/users/Users.dart';
 
 import 'package:agritechv2/views/auth/change_password.dart';
 import 'package:agritechv2/views/auth/forgot_password.dart';
+import 'package:agritechv2/views/auth/terms.dart';
 import 'package:agritechv2/views/calcu/calculator.dart';
 import 'package:agritechv2/views/custom%20widgets/bottom_nav.dart';
 import 'package:agritechv2/views/nav/cart/cart.dart';
@@ -40,6 +41,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../blocs/auth/auth_bloc.dart';
+import '../models/cms/Topic.dart';
 import '../views/auth/login.dart';
 import '../views/auth/signup.dart';
 import '../views/nav/buy/products/search_product_page.dart';
@@ -75,6 +77,12 @@ class AppRouter {
         path: '/signup',
         builder: (BuildContext context, GoRouterState state) {
           return const SignUpPage();
+        },
+      ),
+      GoRoute(
+        path: '/terms',
+        builder: (BuildContext context, GoRouterState state) {
+          return const TermsScreen();
         },
       ),
       GoRoute(
@@ -160,7 +168,7 @@ class AppRouter {
               final Map<String, dynamic> extras =
                   state.extra as Map<String, dynamic>;
 
-              return GcashPayment(
+              return GcashPaymentMethod(
                   transactionID: extras['transactionID'] as String,
                   payment: Payment.fromJson(
                     jsonDecode(extras['payment']),
@@ -220,10 +228,10 @@ class AppRouter {
           GoRoute(
             path: 'view-pest-map-topic',
             builder: (BuildContext context, GoRouterState state) {
-              PestMap topic = state.extra as PestMap;
+              Topic topic = state.extra as Topic;
 
               return ViewTopic(
-                map: topic,
+                topic: topic,
               );
             },
           ),

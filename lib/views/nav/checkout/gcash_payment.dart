@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:agritechv2/blocs/transactions/transactions_bloc.dart';
 
 import 'package:agritechv2/models/transaction/PaymentMethod.dart';
+import 'package:agritechv2/repository/gcash-repository.dart';
 
 import 'package:agritechv2/repository/transaction_repository.dart';
 import 'package:agritechv2/utils/Constants.dart';
@@ -15,17 +16,92 @@ import 'package:flutter_media_downloader/flutter_media_downloader.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../models/payment/QrCodes.dart';
 import '../../../styles/color_styles.dart';
+import 'package:flutter/material.dart';
+
+import '../../custom widgets/button.dart';
+
+class GcashPaymentMethod extends StatelessWidget {
+  final String transactionID;
+  final Payment payment;
+  final String customer;
+
+  const GcashPaymentMethod({
+    super.key,
+    required this.transactionID,
+    required this.customer,
+    required this.payment,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QRCodes?>(
+      stream: GcashRepository().getDefaultPaymentMethod(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text("Gcash Payment"),
+              backgroundColor: ColorStyle.brandRed,
+            ),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasData) {
+          final qrCodes = snapshot.data!;
+
+          return GcashPayment(
+              transactionID: transactionID,
+              customer: customer,
+              payment: payment,
+              qrCodes: qrCodes);
+        } else {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text("Gcash Payment"),
+              backgroundColor: ColorStyle.brandRed,
+            ),
+            body: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('No default payment method available.'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    child: Button(
+                      onTap: () async {
+                        context.pop();
+                      },
+                      buttonWidth: double.infinity,
+                      buttonText: "Back",
+                      buttonColor: ColorStyle.brandRed,
+                      borderColor: ColorStyle.blackColor,
+                      textColor: ColorStyle.whiteColor,
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
 
 class GcashPayment extends StatefulWidget {
   final String transactionID;
   final Payment payment;
   final String customer;
+  final QRCodes qrCodes;
   const GcashPayment(
       {super.key,
       required this.transactionID,
       required this.customer,
-      required this.payment});
+      required this.payment,
+      required this.qrCodes});
 
   @override
   State<GcashPayment> createState() => _GcashPaymentState();
@@ -34,26 +110,6 @@ class GcashPayment extends StatefulWidget {
 class _GcashPaymentState extends State<GcashPayment> {
   String _receipt = 'lib/assets/images/receipt.png';
   File? _selectedFile = null;
-  // Future<void> getImageUrl(String imagePath) async {
-  //   try {
-  //     // Reference to an image file in Firebase Storage
-  //     Reference ref = FirebaseStorage.instance.ref().child("gcash.jpg");
-
-  //     // Get the download URL
-  //     String imageUrl = await ref.getDownloadURL();
-
-  //     print('GCASH : $imageUrl');
-  //   } catch (e) {
-  //     print('Error getting image URL: $e');
-  //     rethrow;
-  //   }
-  // }
-
-  // @override
-  // void initState() {
-  //   getImageUrl("");
-  //   super.initState();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +145,7 @@ class _GcashPaymentState extends State<GcashPayment> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Image.network(
-                      GCASH_LINK,
+                      widget.qrCodes.qrCode,
                       height: 200,
                       width: 250,
                     ),
@@ -100,8 +156,14 @@ class _GcashPaymentState extends State<GcashPayment> {
                         style: ElevatedButton.styleFrom(
                             backgroundColor: ColorStyle.brandRed),
                         onPressed: () async {
-                          _flutterMediaDownloaderPlugin.downloadMedia(
-                              context, GCASH_LINK);
+                          _flutterMediaDownloaderPlugin
+                              .downloadMedia(context, widget.qrCodes.qrCode)
+                              .whenComplete(() =>
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text('Download successful')),
+                                  ))
+                              .catchError((err) => {print(err)});
                         },
                         child: const Text(
                           'Download QR Code',

@@ -249,7 +249,7 @@ class LogoutButton extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 child: Button(
                   onTap: () {
-                    context.read<AuthBloc>().add(AuthLogoutEvent());
+                    _showLogoutConfirmationDialog(context);
                   },
                   buttonWidth: double.infinity,
                   buttonText: "Logout",
@@ -258,6 +258,35 @@ class LogoutButton extends StatelessWidget {
                   textColor: Colors.white,
                 ),
               );
+      },
+    );
+  }
+
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm Logout"),
+          content: const Text("Are you sure you want to logout?"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                context.pop();
+                context
+                    .read<AuthBloc>()
+                    .add(AuthLogoutEvent()); // Trigger logout
+              },
+              child: const Text("Logout"),
+            ),
+          ],
+        );
       },
     );
   }

@@ -80,10 +80,22 @@ class CartRepository {
           final product =
               Products.fromJson(productSnapshot.data() as Map<String, dynamic>);
 
+          final cartQuantity = cart.isVariation
+              ? product.variations
+                  .firstWhere((e) => e.id == cart.variationID)
+                  .stocks
+              : product.stocks;
+
           if (product.isHidden == false &&
-              !product.expiryDate.isBefore(DateTime.now())) {
+              !product.expiryDate.isBefore(DateTime.now()) &&
+              cartQuantity != 0) {
             cartWithProductList
                 .add(CartWithProduct(cart: cart, products: product));
+          } else {
+            _firebaseFirestore
+                .collection(COLLECTION_NAME)
+                .doc(cart.id)
+                .delete();
           }
         }
       }

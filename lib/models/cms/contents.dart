@@ -5,7 +5,7 @@ class Contents {
   String title;
   String description;
   String image;
-  String category;
+
   bool show;
   DateTime createdAt;
 
@@ -14,7 +14,7 @@ class Contents {
     required this.title,
     required this.description,
     required this.image,
-    required this.category,
+
     required this.show,
     required this.createdAt,
   });
@@ -26,7 +26,7 @@ class Contents {
       title: data['title'] as String,
       description: data['description'] as String,
       image: data['image'] as String,
-      category: data['category'] as String,
+ 
       show: data['show'] as bool,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
     );
@@ -38,7 +38,7 @@ class Contents {
       'title': title,
       'description': description,
       'image': image,
-      'category': category,
+
       'show': show,
       'createdAt': Timestamp.fromDate(createdAt),
     };
