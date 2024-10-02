@@ -108,12 +108,12 @@ class GcashPayment extends StatefulWidget {
 }
 
 class _GcashPaymentState extends State<GcashPayment> {
-  String _receipt = 'lib/assets/images/receipt.png';
-  File? _selectedFile = null;
+  final String _receipt = 'lib/assets/images/receipt.png';
+  File? _selectedFile;
 
   @override
   Widget build(BuildContext context) {
-    final _flutterMediaDownloaderPlugin = MediaDownload();
+    final flutterMediaDownloaderPlugin = MediaDownload();
     return WillPopScope(
       onWillPop: () async {
         context.pop();
@@ -156,7 +156,7 @@ class _GcashPaymentState extends State<GcashPayment> {
                         style: ElevatedButton.styleFrom(
                             backgroundColor: ColorStyle.brandRed),
                         onPressed: () async {
-                          _flutterMediaDownloaderPlugin
+                          flutterMediaDownloaderPlugin
                               .downloadMedia(context, widget.qrCodes.qrCode)
                               .whenComplete(() =>
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -209,11 +209,11 @@ class _GcashPaymentState extends State<GcashPayment> {
                           backgroundColor: ColorStyle.brandRed),
                       onPressed: () async {
                         var openAppResult = await LaunchApp.openApp(
-                          androidPackageName: 'com.globe.gcash.android',
-                          appStoreLink:
-                              'https://play.google.com/store/apps/details?id=com.globe.gcash.android&pcampaignid=web_share',
-                          // openStore: false
-                        );
+                            androidPackageName: 'com.globe.gcash.android',
+                            appStoreLink:
+                                'https://play.google.com/store/apps/details?id=com.globe.gcash.android&pcampaignid=web_share',
+                            openStore: false);
+
                         print(
                             'openAppResult => $openAppResult ${openAppResult.runtimeType}');
                       },
@@ -251,7 +251,7 @@ class _GcashPaymentState extends State<GcashPayment> {
                             _selectedFile = file;
                           });
                         } else {
-                          print('create quiz page : error picking image');
+                          print('upload page : error picking image');
                         }
                       },
                       child: const Text(
@@ -284,7 +284,7 @@ class _GcashPaymentState extends State<GcashPayment> {
   }
 }
 
-class ConfirmPayment extends StatelessWidget {
+class ConfirmPayment extends StatefulWidget {
   final File file;
   final String transactionID;
   final Payment payment;
@@ -296,6 +296,11 @@ class ConfirmPayment extends StatelessWidget {
       required this.payment,
       required this.customerName});
 
+  @override
+  State<ConfirmPayment> createState() => _ConfirmPaymentState();
+}
+
+class _ConfirmPaymentState extends State<ConfirmPayment> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -321,7 +326,10 @@ class ConfirmPayment extends StatelessWidget {
                       backgroundColor: ColorStyle.brandRed),
                   onPressed: () async {
                     context.read<TransactionsBloc>().add(AddGcashPayment(
-                        file, customerName, transactionID, payment));
+                        widget.file,
+                        widget.customerName,
+                        widget.transactionID,
+                        widget.payment));
                   },
                   child: const Text(
                     'Confirm Payment',

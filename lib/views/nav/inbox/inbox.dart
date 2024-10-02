@@ -23,7 +23,7 @@ class _InboxPageState extends State<InboxPage> {
       ),
       backgroundColor: Colors.white,
       body: StreamBuilder<List<NewsLetter>>(
-        stream: context.read<NewsletterRepository>().getNewsletter(), // Get UID
+        stream: context.read<NewsletterRepository>().getNewsletter(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text('Error fetching newsletters'));

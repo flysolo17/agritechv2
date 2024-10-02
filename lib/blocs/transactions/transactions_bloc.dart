@@ -62,7 +62,8 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     try {
       await _transactionRepostory.submitTransaction(event.transactions);
       Future.delayed(const Duration(seconds: 2));
-      emit(const TransactionsSuccessState<String>("Transaction Submitted"));
+      var id = event.transactions.id;
+      emit(TransactionsSuccessState<String>(id));
     } catch (e) {
       emit(TransactionsFailedState(e.toString()));
       emit(TransactionsInitial());
@@ -98,10 +99,13 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
 
   Future<void> _onGcashPayment(
       AddGcashPayment event, Emitter<TransactionsState> emit) async {
-    emit(TransactionsLoadingState());
     try {
+      emit(TransactionsLoadingState());
+      print(event.transactionID);
+
       final result =
           await _transactionRepostory.uploadTransactionAttachment(event.file);
+      print("Uploaded");
       if (result != null) {
         PaymentDetails details = PaymentDetails(
             createdAt: DateTime.now(),
@@ -110,14 +114,25 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
             attachmentURL: result);
         event.payment.details = details;
         event.payment.status = PaymentStatus.PAID;
-        await _transactionRepostory.gcashPayment(
-            event.transactionID, event.payment);
-        emit(const TransactionsSuccessState<String>("Payment confirmed!"));
+        print(event.transactionID);
+        await _transactionRepostory
+            .gcashPayment(event.transactionID, event.payment)
+            .then((_) {
+          emit(const TransactionsSuccessState<String>("Payment confirmed!"));
+          print("success");
+        }).catchError((err) {
+          print(err);
+          if (!emit.isDone) {
+            emit(TransactionsFailedState(err.toString()));
+          }
+        });
       } else {
+        print("error");
         emit(
-            const TransactionsFailedState("failed to upload transaction file"));
+            const TransactionsFailedState("Failed to upload transaction file"));
       }
     } catch (e) {
+      print(e);
       emit(TransactionsFailedState(e.toString()));
     }
   }

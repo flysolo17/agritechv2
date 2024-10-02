@@ -8,6 +8,7 @@ import 'package:agritechv2/utils/Constants.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:heif_converter/heif_converter.dart';
 
 import '../models/transaction/OrderItems.dart';
 import '../models/transaction/PaymentMethod.dart';
@@ -75,16 +76,30 @@ class TransactionRepostory {
     }
   }
 
+  Future<File?> downloadAndConvert(File heicFile) async {
+    final resultPath =
+        await HeifConverter.convert(heicFile.path, format: 'png');
+    if (resultPath != null) {
+      return File(resultPath);
+    }
+    return null;
+  }
+
   Future<String?> uploadTransactionAttachment(File file) async {
     try {
-      final Reference storageRef = _storage
-          .ref()
-          .child(COLLECTION_NAME)
-          .child('${DateTime.now().millisecondsSinceEpoch}');
-      final UploadTask uploadTask = storageRef.putFile(file);
-      await uploadTask.whenComplete(() => null);
-      final imageUrl = await storageRef.getDownloadURL();
-      return imageUrl;
+      if (file.path.split('.').last == 'heic') {
+        final convertedFile = await downloadAndConvert(file);
+        if (convertedFile != null) {
+          file = convertedFile;
+        } else {
+          throw Exception("Failed to convert HEIC file.");
+        }
+      }
+      final extension = file.path.split('.').last;
+      final fileName = '${generateInvoiceID()}.$extension';
+      final storageRef = _storage.ref().child(COLLECTION_NAME).child(fileName);
+      await storageRef.putFile(file);
+      return await storageRef.getDownloadURL();
     } catch (e) {
       return null;
     }
@@ -144,10 +159,14 @@ class TransactionRepostory {
     }
   }
 
-  Future<void> gcashPayment(String transactionID, Payment payment) {
-    return _firestore.collection(COLLECTION_NAME).doc(transactionID).update({
-      'payment': payment.toJson(),
-    });
+  Future<void> gcashPayment(String transactionID, Payment payment) async {
+    DocumentReference docRef =
+        _firestore.collection(COLLECTION_NAME).doc(transactionID);
+    await docRef.update(
+      {
+        'payment': payment.toJson(),
+      },
+    );
   }
 
   Future<int> computeProductsSold(String productID) async {

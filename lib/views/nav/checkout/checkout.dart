@@ -263,11 +263,15 @@ class ConfirmCheckout extends StatelessWidget {
                 .showSnackBar(SnackBar(content: Text(state.message)));
           }
           if (state is TransactionsSuccessState<String>) {
-            if (paymentType == PaymentType.GCASH) {
-              context.push('/gcash-payment', extra: {
-                'transactionID': state.data,
-                'payment': jsonEncode(transactions.payment),
-                'customer': customer?.name ?? ''
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text("order placed")));
+            if (paymentType == PaymentType.GCASH && state.data.isNotEmpty) {
+              Future.delayed(const Duration(seconds: 1), () {
+                context.push('/gcash-payment', extra: {
+                  'transactionID': state.data,
+                  'payment': jsonEncode(transactions.payment),
+                  'customer': customer?.name ?? ''
+                });
               });
             } else {
               _showBottomSheet(context);

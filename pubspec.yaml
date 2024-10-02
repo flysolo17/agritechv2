@@ -69,6 +69,7 @@ dependencies:
   flutter_media_downloader: ^1.0.4
   rxdart: ^0.27.7
   toggle_switch: ^2.2.1
+  heif_converter: ^1.0.0
 
 dev_dependencies:
   flutter_test:
