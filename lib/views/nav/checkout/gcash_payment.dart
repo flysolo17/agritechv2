@@ -209,10 +209,11 @@ class _GcashPaymentState extends State<GcashPayment> {
                           backgroundColor: ColorStyle.brandRed),
                       onPressed: () async {
                         var openAppResult = await LaunchApp.openApp(
-                            androidPackageName: 'com.globe.gcash.android',
-                            appStoreLink:
-                                'https://play.google.com/store/apps/details?id=com.globe.gcash.android&pcampaignid=web_share',
-                            openStore: false);
+                          androidPackageName: 'com.globe.gcash.android',
+                          appStoreLink:
+                              'https://play.google.com/store/apps/details?id=com.globe.gcash.android&pcampaignid=web_share',
+                          openStore: false,
+                        );
 
                         print(
                             'openAppResult => $openAppResult ${openAppResult.runtimeType}');

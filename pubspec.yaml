@@ -70,6 +70,7 @@ dependencies:
   rxdart: ^0.27.7
   toggle_switch: ^2.2.1
   heif_converter: ^1.0.0
+  app_launcher: ^1.0.1
 
 dev_dependencies:
   flutter_test:
