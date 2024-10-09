@@ -29,6 +29,13 @@
             {
               "client_id": "86812211596-vodhfbk9feouhtj7nk0dvhfs4ptgvk5s.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "86812211596-7e7a0nf7jch8ghms3k3ed9rcdj22ob44.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.agritechv2"
+              }
             }
           ]
         }

@@ -37,7 +37,7 @@ dependencies:
   flutter_svg: ^2.0.7
   google_fonts: ^5.1.0
   firebase_auth: ^4.7.1
-  firebase_core: ^2.15.0
+  firebase_core: ^2.32.0
   cloud_firestore: ^4.8.4
   firebase_ui_firestore: ^1.5.6
   go_router: ^10.0.0
@@ -71,6 +71,7 @@ dependencies:
   toggle_switch: ^2.2.1
   heif_converter: ^1.0.0
   app_launcher: ^1.0.1
+  win32: ^5.5.5
 
 dev_dependencies:
   flutter_test:

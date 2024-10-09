@@ -1,5 +1,6 @@
 import 'package:agritechv2/blocs/cart/cart_bloc.dart';
 import 'package:agritechv2/blocs/product/product_bloc.dart';
+import 'package:agritechv2/firebase_options.dart';
 import 'package:agritechv2/repository/audit_repository.dart';
 import 'package:agritechv2/repository/auth_repository.dart';
 import 'package:agritechv2/repository/cart_repository.dart';
@@ -24,9 +25,11 @@ import 'blocs/auth/auth_bloc.dart';
 import 'blocs/messenger/messenger_bloc.dart';
 import 'config/router.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }

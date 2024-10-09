@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:agritechv2/blocs/transactions/transactions_bloc.dart';
 
@@ -7,6 +8,7 @@ import 'package:agritechv2/repository/gcash-repository.dart';
 
 import 'package:agritechv2/repository/transaction_repository.dart';
 import 'package:agritechv2/utils/Constants.dart';
+import 'package:dio/dio.dart';
 
 import 'package:external_app_launcher/external_app_launcher.dart';
 
@@ -14,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_media_downloader/flutter_media_downloader.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../models/payment/QrCodes.dart';
@@ -111,6 +114,17 @@ class _GcashPaymentState extends State<GcashPayment> {
   final String _receipt = 'lib/assets/images/receipt.png';
   File? _selectedFile;
 
+  _saveNetworkImage(String url) async {
+    var response = await Dio()
+        .get(url, options: Options(responseType: ResponseType.bytes));
+    final result = await ImageGallerySaver.saveImage(
+        Uint8List.fromList(response.data),
+        quality: 60,
+        name: "agritech-qr");
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Successfully Downloaded")));
+  }
+
   @override
   Widget build(BuildContext context) {
     final flutterMediaDownloaderPlugin = MediaDownload();
@@ -156,14 +170,7 @@ class _GcashPaymentState extends State<GcashPayment> {
                         style: ElevatedButton.styleFrom(
                             backgroundColor: ColorStyle.brandRed),
                         onPressed: () async {
-                          flutterMediaDownloaderPlugin
-                              .downloadMedia(context, widget.qrCodes.qrCode)
-                              .whenComplete(() =>
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text('Download successful')),
-                                  ))
-                              .catchError((err) => {print(err)});
+                          _saveNetworkImage(widget.qrCodes.qrCode);
                         },
                         child: const Text(
                           'Download QR Code',
