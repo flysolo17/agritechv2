@@ -42,6 +42,7 @@ class ContentRepository {
       _firebaseFirestore
           .collection(TOPIC_COLLECTION)
           .where('subjectID', isEqualTo: subjectID)
+          .where('open', isEqualTo: true)
           .orderBy('createdAt', descending: true)
           .snapshots()
           .listen((QuerySnapshot<Map<String, dynamic>> snapshot) {
